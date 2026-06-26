@@ -1,6 +1,6 @@
 ---
 name: pages-templates
-description: Composes React/Next.js pages and layout templates from the component library, following the UX designer's page and template structure. Invoked when the user says "build pages", "compose templates", "implement the layout", "turn this design into a Next.js page", "wire up the page structure", "scaffold Next.js routes from designs", "implement the template layer", or "build page from Figma". Keeps pages thin and pushes domain logic to the backend.
+description: Composes React routes and layout templates with TanStack Start from the component library, following the UX designer's page and template structure. Invoked when the user says "build pages", "compose templates", "implement the layout", "turn this design into a route", "wire up the page structure", "scaffold TanStack Start routes from designs", "implement the template layer", or "build page from Figma". Keeps routes thin and pushes domain logic to the backend.
 ---
 
 # Pages & Templates Skill

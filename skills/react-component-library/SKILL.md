@@ -1,6 +1,6 @@
 ---
 name: react-component-library
-description: Builds a reusable, accessible, typed React/Next.js component library from design tokens and Figma designs. Invoked when the user says "build the component library", "implement these components", "create React components from tokens", "build a design-system component library", "scaffold components from Figma", "implement design tokens in code", or "add accessible components". Reads tokens.json (W3C DTCG) produced by the UX designer and maps Figma auto-layout to CSS flex/grid.
+description: Builds a reusable, accessible, typed React component library (framework-agnostic, used by TanStack Start apps) from design tokens and Figma designs. Invoked when the user says "build the component library", "implement these components", "create React components from tokens", "build a design-system component library", "scaffold components from Figma", "implement design tokens in code", or "add accessible components". Reads tokens.json (W3C DTCG) produced by the UX designer and maps Figma auto-layout to CSS flex/grid.
 ---
 
 # React Component Library Skill
