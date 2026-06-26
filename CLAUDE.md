@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides five specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
+This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides six specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
 
 ### Layout
 
@@ -18,6 +18,7 @@ agents/
   frontend-engineer.md # Figma → React + TanStack Start component libraries + pages
   backend-engineer.md  # Go/Node/Rust services on AWS/Cloudflare/Hetzner
   systems-architect.md # system topology, service boundaries, ADRs, NFRs, tech selection
+  data-architect.md    # store selection, schema design, vector/RAG data modeling, aggregate-to-schema mapping
   staff-engineer.md    # read-only reviewer against all four principle skills
 
 skills/
@@ -34,6 +35,7 @@ skills/
   backend-service-patterns/ # hexagonal arch, per-language patterns
   cloud-infra/             # AWS/Cloudflare/Hetzner IaC and observability
   architecture/            # C4 diagrams, ADRs, NFRs, tech selection, evolutionary arch
+  data-modeling/           # store selection, schema design, indexing, migrations, vector/RAG data design
   code-review/             # structured review checklist used by staff-engineer
   handoff/                 # session handoff — write before ending a work chunk
 
