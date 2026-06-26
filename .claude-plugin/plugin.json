@@ -1,0 +1,16 @@
+{
+  "name": "ai",
+  "version": "0.1.0",
+  "description": "Personal AI dev team: UX designer, frontend, backend, and staff engineer agents plus the shared TDD/DDD/pragmatic-SOLID/DRY-KISS skills they operate by. Requires the superpowers plugin.",
+  "author": { "name": "Blaine Richardson", "email": "blainerrichardson@gmail.com" },
+  "homepage": "https://github.com/bRRRITSCOLD/ai",
+  "repository": "https://github.com/bRRRITSCOLD/ai",
+  "license": "MIT",
+  "keywords": ["agents", "skills", "ux", "frontend", "backend", "ddd", "tdd", "figma"],
+  "mcpServers": {
+    "figma-dev-mode": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp"
+    }
+  }
+}
