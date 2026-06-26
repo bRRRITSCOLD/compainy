@@ -30,10 +30,11 @@ Confirm the project has a `figma.config.json` (or `codeConnect` field in `packag
 
 ### 2. Discover components to map
 
-Run the `figma-dev-mode` MCP to enumerate component sets in the current Figma file:
+Use the official Figma MCP (from the `figma@claude-plugins-official` companion) to enumerate the publishable components in the file:
 
 ```
-get_component_sets → list all publishable components
+search_design_system / get_design_context → list components and component sets
+get_code_connect_map → see which Figma nodes already have a Code Connect mapping
 ```
 
 Cross-reference against the React component library (search `src/components/**/*.tsx`). Identify gaps — components that exist in Figma but have no mapping file yet.
