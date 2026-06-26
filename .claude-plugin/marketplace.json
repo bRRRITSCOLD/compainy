@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "ai",
-  "description": "Blaine Richardson's personal AI dev-team plugin, plus the superpowers companion it relies on.",
+  "description": "Blaine Richardson's personal AI dev-team plugin, plus the superpowers and figma companions it relies on.",
   "owner": { "name": "Blaine Richardson", "url": "https://github.com/bRRRITSCOLD" },
   "plugins": [
     {
@@ -15,6 +15,12 @@
       "description": "Required companion: core skills library (brainstorming, writing-plans, TDD, code review) the ai agents build on.",
       "source": { "source": "github", "repo": "obra/superpowers" },
       "category": "productivity"
+    },
+    {
+      "name": "figma",
+      "description": "Required companion: official Figma MCP server. Gives the ux-designer agent write-to-canvas tools (use_figma, create_new_file, generate_figma_design) and the frontend-engineer Code Connect. Write-to-canvas needs a Figma Full seat on a paid plan.",
+      "source": { "source": "url", "url": "https://github.com/figma/mcp-server-guide.git", "sha": "bea8bea5f676ab2bf76fa822b82f50b66653c098" },
+      "category": "design"
     }
   ]
 }
