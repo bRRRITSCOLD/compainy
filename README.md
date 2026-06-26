@@ -1,6 +1,6 @@
 # ai
 
-Personal AI dev-team plugin for Claude Code. Four specialist agents — UX designer, frontend engineer, backend engineer, and staff engineer — plus a shared library of engineering-principle skills they all operate by.
+Personal AI dev-team plugin for Claude Code. Five specialist agents — UX designer, frontend engineer, backend engineer, systems architect, and staff engineer — plus a shared library of engineering-principle skills they all operate by.
 
 ## What it is
 
@@ -9,7 +9,8 @@ A Claude Code plugin that gives you a complete feature-delivery team:
 - **ux-designer** — authors design systems and UX work directly in Figma using the official Figma MCP write tools; extracts tokens for code consumers; wires Code Connect so Dev Mode shows real component examples.
 - **frontend-engineer** — takes Figma designs all the way to production-ready React + TanStack Start code; builds typed, accessible component libraries from `tokens.json`; composes pages and templates.
 - **backend-engineer** — designs and implements high-performance services in Go, Node/TypeScript, and Rust; deploys on AWS, Cloudflare, and Hetzner; applies hexagonal/ports-and-adapters architecture throughout.
-- **staff-engineer** — reviews code from all three engineer agents against the team's principle skills plus correctness, security, and performance; does not write code.
+- **systems-architect** — designs system topology, defines service and bounded-context boundaries, authors ADRs, evaluates non-functional requirements, and selects technology with explicit tradeoffs.
+- **staff-engineer** — reviews code from all four engineer agents against the team's principle skills plus correctness, security, and performance; does not write code.
 
 Shared principle skills — TDD, DDD, pragmatic SOLID, DRY/KISS — are the single source of truth for how every agent reasons and works.
 
@@ -49,9 +50,10 @@ Read tools used by the frontend-engineer work at any seat level.
 | `ux-designer` | Authors design systems, components, frames, and variables directly in Figma; extracts `tokens.json`; wires Code Connect | `figma-design-system`, `figma-code-connect`, `design-theming` |
 | `frontend-engineer` | Reads Figma outputs and implements React + TanStack Start component libraries, pages, and templates | `react-component-library`, `code-connect-impl`, `pages-templates` |
 | `backend-engineer` | Builds Go / Node / Rust services deployed on AWS, Cloudflare, or Hetzner; hexagonal architecture, IaC-first | `backend-service-patterns`, `cloud-infra` |
+| `systems-architect` | Designs system topology, defines service/bounded-context boundaries, writes ADRs, evaluates NFRs, selects technology with tradeoffs | `architecture` |
 | `staff-engineer` | Reviews all engineer output for principle compliance, correctness, security, and performance | `code-review` (read-only toolset) |
 
-All four agents also carry the shared principle skills: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss`.
+The four engineering and architecture agents — `frontend-engineer`, `backend-engineer`, `staff-engineer`, and `systems-architect` — carry all four shared principle skills: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss`. The `ux-designer` carries `principles-dry-kiss` for design-token discipline.
 
 ## Principles
 
