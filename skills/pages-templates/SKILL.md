@@ -129,7 +129,7 @@ describe('DashboardPage', () => {
   afterEach(async () => {});
   afterAll(async () => { /* clean up */ });
 
-  it('renders the key metrics section', async () => {
+  it('DashboardPage_KeyMetrics_RendersRegion', async () => {
     const router = createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ['/dashboard'] }) });
     render(<RouterProvider router={router} />);
     expect(await screen.findByRole('region', { name: /key metrics/i })).toBeInTheDocument();
@@ -302,7 +302,7 @@ describe('SignupForm', () => {
   afterEach(async () => {});
   afterAll(async () => {});
 
-  it('shows email format error after typing an invalid email and blurring', async () => {
+  it('SignupForm_InvalidEmail_ShowsValidationError', async () => {
     render(<SignupForm />);
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'notanemail' } });
     fireEvent.blur(screen.getByLabelText(/email/i));
@@ -453,7 +453,7 @@ describe('ProductList', () => {
   afterEach(async () => {});
   afterAll(async () => {});
 
-  it('resets page to 1 when the search query changes', async () => {
+  it('ProductList_SearchChanged_ResetsPageToOne', async () => {
     const onUrlUpdate = vi.fn();
     render(
       <NuqsTestingAdapter searchParams="?page=3" onUrlUpdate={onUrlUpdate}>
