@@ -166,6 +166,9 @@ import (
 )
 
 // TestOrderServiceIntegration_Suite is the testify entry point for the integration suite.
+// Suite dispatcher funcs (the `func TestXxx(t) { suite.Run(t, ...) }` boilerplate) are
+// EXEMPT from the Subject_Scenario_Expectation rule — they run no assertions themselves;
+// the three-part naming applies to the suite's test METHODS, which are the real cases.
 func TestOrderServiceIntegration_Suite(t *testing.T) {
     suite.Run(t, new(OrderServiceSuite))
 }
