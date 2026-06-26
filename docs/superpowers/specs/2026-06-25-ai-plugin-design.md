@@ -23,9 +23,15 @@ working agent team and skill library, with `superpowers` offered alongside.
   field**. Handle via (a) repo `marketplace.json` listing both `ai` and `superpowers`
   (git source), and (b) README requirement note. No `/setup` shell-install command
   (brittle).
-- **Figma access:** official **Figma Dev Mode MCP** (local, `http://127.0.0.1:3845`).
-  Read + Code Connect oriented; native authoring of full design systems *inside* Figma
-  is out of scope for the official MCP. Agents extract/codify, not auto-draw.
+- **Figma access:** official **Figma MCP (remote server)**, distributed as the
+  `figma@claude-plugins-official` companion plugin (listed in our marketplace.json,
+  OAuth install). It is **write-capable**: `use_figma`, `create_new_file`,
+  `generate_figma_design`, `upload_assets` (write) plus read tools and Code Connect
+  (`add_code_connect_map`). The ux-designer **authors** design systems/components/frames
+  in Figma; the frontend-engineer takes Figma → code. Write-to-canvas requires a Figma
+  **Full seat** on a paid plan (Dev seat = read-only outside drafts). Figma's `figma-use`
+  skill drives the write tools. (Superseded the earlier read-only Dev-Mode-MCP assumption;
+  the local `127.0.0.1:3845` desktop server lacks write tools and was dropped.)
 - **Build depth:** full set authored in v1 (all 4 agents + all skills + wiring).
   Implementation parallelized via `subagent-driven-development`.
 - **Visibility:** public GitHub repo.
@@ -44,7 +50,7 @@ Session hooks inject working-hygiene guidance and surface handoff files.
 ```
 ai/
 ├── .claude-plugin/
-│   ├── plugin.json          # manifest + mcpServers (Figma Dev Mode)
+│   ├── plugin.json          # manifest (no mcpServers — Figma via figma companion)
 │   └── marketplace.json     # lists ai (./) + superpowers (git)
 ├── agents/
 │   ├── ux-designer.md
@@ -80,11 +86,13 @@ Each agent `.md`: frontmatter (`name`, `description`, `tools`, optional `model`)
 covering role, when to invoke, the skills it operates by, and a hard instruction to
 follow the referenced principle skills.
 
-- **ux-designer** — Figma MCP (read selections / variables / code) + skills
+- **ux-designer** — official Figma MCP (remote, write-capable) + skills
   `figma-design-system`, `figma-code-connect`, `design-theming`, `principles-dry-kiss`.
-  Scope is honest about the official Dev Mode MCP boundary: **read + Code Connect**.
-  Output = design-system-as-code (tokens, specs) + Code Connect mappings + theming/branding
-  variants, not auto-drawn Figma frames.
+  **Authors** design systems, components, variables, frames, templates and themed/branded
+  app files directly in Figma (`use_figma`, `create_new_file`, `generate_figma_design`)
+  with the design library as source of truth, deferring to Figma's `figma-use` skill for
+  write mechanics. Can also mirror tokens to `tokens.json` for the frontend. Write needs a
+  Figma Full seat.
 - **frontend-engineer** — `react-component-library`, `code-connect-impl`, `pages-templates`
   + all 4 principle skills. Consumes UX tokens → reusable React/Next.js component library,
   wires Figma Code Connect, builds pages/templates.
@@ -147,8 +155,7 @@ edit once, every agent inherits.
 
 ## 11. Out of scope (YAGNI)
 
-- Auto-drawing/writing design systems inside Figma (official MCP can't).
-- `/setup` auto-installer for superpowers.
+- `/setup` auto-installer for the companion plugins (superpowers, figma).
 - Non-DI parts of SOLID applied dogmatically; tactical-DDD-by-default.
 - Per-agent duplicated principle text (shared skills instead).
 ```
