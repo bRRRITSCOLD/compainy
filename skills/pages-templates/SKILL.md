@@ -1,6 +1,6 @@
 ---
 name: pages-templates
-description: Composes React routes and layout templates with TanStack Start from the component library, following the UX designer's page and template structure. Invoked when the user says "build pages", "compose templates", "implement the layout", "turn this design into a route", "wire up the page structure", "scaffold TanStack Start routes from designs", "implement the template layer", "build page from Figma", "add a form", "build a form", "tanstack form", "tanstack form useForm", "form validation", "nuqs", "url state", "query state", "useQueryState", "url search params", or "query params". Keeps routes thin and pushes domain logic to the backend.
+description: Composes React routes and layout templates with TanStack Start from the component library, following the UX designer's page and template structure. Invoked when the user says "build pages", "compose templates", "implement the layout", "turn this design into a route", "wire up the page structure", "scaffold TanStack Start routes from designs", "implement the template layer", "build page from Figma", "add a form", "build a form", "tanstack form", "tanstack form useForm", "form validation", "zod", "zod schema", "schema validation", "nuqs", "url state", "query state", "useQueryState", "url search params", or "query params". Keeps routes thin and pushes domain logic to the backend.
 ---
 
 # Pages & Templates Skill
@@ -146,33 +146,40 @@ Use `@tanstack/react-form` for all interactive forms in routes. It is headless (
 Install once per project:
 
 ```bash
-npm install @tanstack/react-form
+npm install @tanstack/react-form zod
 ```
 
 #### Pattern — `useForm` + `form.Field` render prop
 
 ```tsx
 // src/routes/signup.tsx (or a co-located form component)
+import { z } from 'zod';
 import { useForm } from '@tanstack/react-form';
 import { Input } from '@/components/Input';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
 import { createServerFn } from '@tanstack/react-start';
 
+// Single schema — source of truth for client validation AND server-side parsing (DRY)
+const signupSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Enter a valid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+type SignupInput = z.infer<typeof signupSchema>;
+
+// createServerFn accepts Standard Schema — signupSchema validates and types the server input
 const submitSignup = createServerFn({ method: 'POST' })
-  .validator((raw: unknown) => {
-    // Inline validator — a Zod schema adapter will replace this in issue #6
-    const d = raw as { email: string; password: string };
-    if (!d.email || !d.password) throw new Error('email and password are required');
-    return d;
-  })
+  .validator(signupSchema)
   .handler(async ({ data }) => {
-    // data is typed as { email: string; password: string } — domain service call here
+    // data is typed as SignupInput — domain service call here
   });
 
 export function SignupForm() {
   const form = useForm({
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '' } satisfies SignupInput,
+    // TanStack Form v1 supports Standard Schema — pass the zod schema directly
+    validators: { onSubmit: signupSchema },
     onSubmit: async ({ value }) => {
       await submitSignup({ data: value });
     },
@@ -187,18 +194,11 @@ export function SignupForm() {
       }}
       className="flex flex-col gap-4"
     >
-      {/* Field-level validation */}
+      {/* Field validators also accept Standard Schema — reuse field shapes from signupSchema */}
       <form.Field
         name="email"
         validators={{
-          onChange: ({ value }) =>
-            !value ? 'Email is required' : undefined,
-          onBlur: ({ value }) => {
-              if (!value) return undefined;
-              return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-                ? 'Enter a valid email'
-                : undefined;
-            },
+          onBlur: signupSchema.shape.email,
         }}
       >
         {(field) => (
@@ -224,8 +224,7 @@ export function SignupForm() {
       <form.Field
         name="password"
         validators={{
-          onChange: ({ value }) =>
-            value.length < 8 ? 'Password must be at least 8 characters' : undefined,
+          onBlur: signupSchema.shape.password,
         }}
       >
         {(field) => (
@@ -276,7 +275,13 @@ export function SignupForm() {
 
 #### Validation
 
-Validators on `form.Field` accept `onChange`, `onBlur`, and `onSubmit` keys. Each receives `{ value }` and returns an error string or `undefined`. Validation is pluggable — a Zod schema adapter (`@tanstack/zod-form-adapter`) will be introduced in a later issue to replace inline validator functions with schema-driven validation.
+TanStack Form v1 supports [Standard Schema](https://standardschema.dev) natively — pass a zod schema directly as a validator with no extra adapter package required.
+
+- **Form-level**: `validators: { onSubmit: signupSchema }` on `useForm` validates the whole form on submit; errors are routed to their matching fields.
+- **Field-level**: `validators: { onBlur: signupSchema.shape.email }` validates a single field on the given event, giving immediate per-field feedback on blur.
+- **Server function**: `.validator(signupSchema)` on `createServerFn` parses and types the server-side input using the same schema (Standard Schema–compatible).
+
+One schema (`signupSchema`) drives client validation, server parsing, and TypeScript types (`z.infer<typeof signupSchema>`) — no duplication between client and server.
 
 #### Shadcn/ui compatibility note
 

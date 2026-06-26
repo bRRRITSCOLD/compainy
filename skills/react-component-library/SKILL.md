@@ -220,6 +220,8 @@ Accessibility requirements (non-negotiable):
 - Color is never the only differentiator (add icons, patterns, or text labels).
 - Components accept and forward `className`, `style`, and all standard HTML attributes via rest-props spread.
 
+For form input components (`Input`, `Textarea`, `Select`), validation is the caller's responsibility — validation schemas are zod; see the `pages-templates` skill for wiring TanStack Form validators and `createServerFn` to a shared zod schema.
+
 Type all props with TypeScript interfaces in `Button.types.ts`. Export the interface from the barrel so consumers can import prop types without importing the component.
 
 ### 6. Write Storybook stories

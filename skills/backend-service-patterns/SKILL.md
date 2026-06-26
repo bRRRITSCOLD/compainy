@@ -1,6 +1,6 @@
 ---
 name: backend-service-patterns
-description: Applies hexagonal/ports-and-adapters architecture for backend services. Invoked when building a backend service, designing a Go/Node/Rust API, implementing a high-performance service, structuring a domain with ports and adapters, wiring dependency injection in a service, designing transport or persistence adapters, or applying DDD in a backend context. Ties to principles-tdd, principles-ddd, principles-pragmatic-solid, and principles-dry-kiss.
+description: Applies hexagonal/ports-and-adapters architecture for backend services. Invoked when building a backend service, designing a Go/Node/Rust API, implementing a high-performance service, structuring a domain with ports and adapters, wiring dependency injection in a service, designing transport or persistence adapters, applying DDD in a backend context, validating input with zod, or parsing untrusted data at the adapter boundary. Ties to principles-tdd, principles-ddd, principles-pragmatic-solid, and principles-dry-kiss.
 ---
 
 # Backend Service Patterns
@@ -31,6 +31,9 @@ Define small, behavior-focused interfaces (`Repository`, `Publisher`, `Cache`). 
 **Goroutine and context discipline.**
 Pass `context.Context` as the first argument to every function that does I/O. Propagate cancellation — never launch goroutines that outlive the request without a clear ownership mechanism (done channel, `errgroup`, or `sync.WaitGroup`). Goroutine leaks are subtle performance bugs; context propagation prevents them.
 
+**Validate at the adapter boundary.**
+Parse untrusted HTTP input into typed structs before passing to the domain. Use `go-playground/validator` with struct tags (`validate:"required,uuid4"` etc.) and call `validate.Struct(&cmd)` in the transport adapter. Same principle as zod in Node: validation happens at the adapter layer; the domain receives only typed, validated values.
+
 **Error handling.**
 Wrap errors with `fmt.Errorf("...: %w", err)` at every layer boundary so callers can `errors.Is`/`errors.As` without losing stack context. Domain errors should be typed values, not strings — callers pattern-match on error type, not message content.
 
@@ -44,6 +47,28 @@ Prefer explicit constructor injection (manual DI) for services with few dependen
 **Strict types throughout.**
 Enable `strict: true` in `tsconfig.json`. Model domain types as branded primitives or discriminated unions so invalid states are unrepresentable at compile time. Avoid `any`; use `unknown` and narrow. Keep adapter types (DB row shapes, HTTP request bodies) separate from domain types — map at the adapter boundary.
 
+**Input validation at the adapter boundary (zod).**
+Parse untrusted input — HTTP request bodies, query params, message-queue payloads — with a zod schema before it reaches the domain. Use `schema.parse(raw)` to throw on invalid data or `schema.safeParse(raw)` for explicit error handling without exceptions. Derive TypeScript types directly from the schema with `z.infer<typeof schema>` — one definition, no duplication between the schema and the type. The domain core only ever receives validated, typed values; validation logic never leaks into domain functions.
+
+```ts
+// src/adapters/http/orders.ts (transport adapter)
+import { z } from 'zod';
+
+const createOrderSchema = z.object({
+  customerId: z.string().uuid(),
+  items: z.array(z.object({ sku: z.string(), qty: z.number().int().positive() })),
+});
+
+type CreateOrderCommand = z.infer<typeof createOrderSchema>;
+
+// In the route handler — validate at the boundary, pass typed value to the domain:
+const result = createOrderSchema.safeParse(request.body);
+if (!result.success) return reply.status(400).send({ errors: result.error.flatten() });
+const order = await orderService.createOrder(result.data); // domain receives CreateOrderCommand
+```
+
+For Fastify projects, `fastify-type-provider-zod` integrates zod schemas into Fastify's route schema system, providing automatic JSON Schema generation and a typed `request.body` without a manual `.parse()` call — issue #7 will wire this up.
+
 **Async discipline.**
 All I/O is `async/await`. Never mix raw Promises and async/await in the same call chain. Use `AbortSignal` / request-scoped cancellation for long-running operations. Handle errors at a single boundary (global middleware or a top-level `try/catch`) rather than swallowing them inside adapters.
 
@@ -56,6 +81,9 @@ Define a trait per port (`Repository`, `EventBus`, `Clock`). Implement for concr
 
 **Ownership-aware design.**
 Prefer `Arc<dyn Trait>` for shared service handles injected across async tasks. Avoid `Rc` in multi-threaded code. Use `tokio::sync::Mutex` sparingly — structure data access to minimize lock scope. Design the domain so owned types flow naturally; reach for shared references only at the boundary.
+
+**Validate at the adapter boundary.**
+Derive `serde::Deserialize` and `validator::Validate` on HTTP input structs, then call `.validate()?` immediately after deserialization and before passing to the domain. The `validator` crate with field-level constraints (`#[validate(email)]`, `#[validate(length(min = 1))]`) is the Rust equivalent of zod: untrusted data is rejected at the adapter layer; the domain core only ever handles valid, typed values.
 
 **Error handling.**
 Define a domain `Error` enum (or use `thiserror`) and `Result<T, Error>` at every domain function. Adapters convert external errors (`sqlx::Error`, `reqwest::Error`) into domain error variants at the adapter boundary — domain code never leaks infrastructure error types.
