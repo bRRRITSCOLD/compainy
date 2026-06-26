@@ -13,7 +13,7 @@ Compose the built React component library into layout templates and Next.js page
 
 Before writing any code, read the UX designer's outputs:
 - Inspect `design-system.md` for the template and page inventory.
-- Use the Figma MCP read tools (`get_design_context`, `search_design_system`) via the **figma@claude-plugins-official** companion plugin to inspect the **Templates** and **Pages** sections of the Figma file.
+- Use the Figma MCP read tools (`get_design_context`, `search_design_system`) via the **`figma`** companion plugin to inspect the **Templates** and **Pages** sections of the Figma file.
 - Identify the layout regions (header, sidebar, main, footer), the component slots each region contains, and the responsive breakpoints specified in the design.
 
 Map the Figma frame hierarchy to a Next.js route:

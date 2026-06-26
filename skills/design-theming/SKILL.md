@@ -60,7 +60,7 @@ Name the file `tokens.<brand>.json` (e.g. `tokens.acme.json`, `tokens.beta.json`
 
 ### 4. Merge strategy for consumers
 
-The frontend engineer (Task 8) merges base + brand tokens at build time. Document the merge order:
+The frontend engineer merges base + brand tokens at build time. Document the merge order:
 
 1. Load `tokens.json` (base primitives + default semantics).
 2. Deep-merge `tokens.<brand>.json` — brand values win on collision.
@@ -73,8 +73,8 @@ Never duplicate a token value in both the base file and a brand file. If a token
 
 For each `tokens.<brand>.json`:
 
-- Confirm valid JSON: `node -e "JSON.parse(require('fs').readFileSync('tokens.<brand>.json','utf8'))" && echo valid`.
-- Confirm every reference resolves: after merging with the base, no `{token.path}` should point to a missing key.
+- Confirm valid JSON (syntax check only): `node -e "JSON.parse(require('fs').readFileSync('tokens.<brand>.json','utf8'))" && echo valid`.
+- Confirm alias references resolve: the JSON.parse command above does not verify `{token.path}` aliases — resolving them requires a token transform tool (e.g. Style Dictionary) or a script that merges the base and brand files and walks every `$value` alias to confirm it points to a defined key. Run such a script before handoff.
 - Confirm the brand file adds or overrides at least one token — an empty brand file is a no-op and should be removed.
 
 ### 6. Scaling to many brands

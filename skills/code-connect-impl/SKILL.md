@@ -34,7 +34,7 @@ Create it if absent. The `documentUrl` is the URL of the Figma design file the U
 
 ### 2. Discover components via Figma MCP
 
-Use the official Figma MCP read tools (from the **figma@claude-plugins-official** companion plugin) to enumerate components that need mapping:
+Use the official Figma MCP read tools (from the **`figma`** companion plugin) to enumerate components that need mapping:
 
 ```
 get_code_connect_map    → list existing Code Connect mappings; identify gaps

@@ -1,6 +1,6 @@
 ---
 name: figma-design-system
-description: Builds and maintains a design system in Figma, then extracts and codifies it for code consumers. Invoked when the user says "build a design system in Figma", "create components in Figma", "extract design tokens", "extract Figma variables", "codify design system", "pull tokens from Figma", or "generate tokens.json". Uses the official Figma MCP (figma@claude-plugins-official) to create frames, components, variables, and styles — and to read/export them as tokens.json.
+description: Builds and maintains a design system in Figma, then extracts and codifies it for code consumers. Invoked when the user says "build a design system in Figma", "create components in Figma", "extract design tokens", "extract Figma variables", "codify design system", "pull tokens from Figma", or "generate tokens.json". Uses the official Figma MCP (the `figma` companion plugin) to create frames, components, variables, and styles — and to read/export them as tokens.json.
 ---
 
 # Figma Design System Skill
@@ -15,7 +15,7 @@ For write mechanics (`use_figma`, `create_new_file`, `generate_figma_design`), d
 
 ### 1. Build the design system in Figma
 
-Use the official Figma MCP write tools (via the `figma@claude-plugins-official` companion plugin) to create or extend the design system directly in Figma. Defer to the **`figma-use`** skill for step-by-step write mechanics.
+Use the official Figma MCP write tools (via the `figma` companion plugin) to create or extend the design system directly in Figma. Defer to the **`figma-use`** skill for step-by-step write mechanics.
 
 Key write operations:
 - `create_new_file` — create a new Figma file for the design system if one does not exist.

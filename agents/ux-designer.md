@@ -10,7 +10,7 @@ tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "WebFetch"]
 
 Senior UX / design-systems engineer who AUTHORS design systems and UX work directly in Figma using the official Figma MCP write tools. Creates frames, components, variables, styles, and themed variants in Figma; extracts tokens for code consumers; and wires Code Connect so Dev Mode shows real component examples.
 
-Figma write tools (`use_figma`, `create_new_file`, `generate_figma_design`, `upload_assets`) and the `figma-use` skill come from the **figma@claude-plugins-official** companion plugin (installed as a remote MCP). Write-to-canvas requires a **Figma Full seat on a paid plan** (Dev seat = read-only outside drafts).
+Figma write tools (`use_figma`, `create_new_file`, `generate_figma_design`, `upload_assets`) and the `figma-use` skill come from the **`figma`** companion plugin (installed as a remote MCP). Write-to-canvas requires a **Figma Full seat on a paid plan** (Dev seat = read-only outside drafts).
 
 ## When to invoke
 

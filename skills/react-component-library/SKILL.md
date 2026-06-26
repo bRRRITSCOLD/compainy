@@ -41,11 +41,13 @@ Transform tokens into CSS custom properties or a Tailwind theme extension. Resol
 
 Or, for a Tailwind project, emit `tailwind.tokens.js` that extends `theme.colors`, `theme.spacing`, `theme.borderRadius`, and `theme.boxShadow` from the resolved token values.
 
-Validate that every `$value` reference resolves — no dangling aliases:
+Validate that `tokens.json` is well-formed JSON:
 
 ```bash
 node -e "JSON.parse(require('fs').readFileSync('tokens.json','utf8'))" && echo "tokens.json valid"
 ```
+
+Note: this command checks JSON syntax only. Resolving `{...}` alias references (e.g. `{color.blue.500}`) requires a token transform tool such as Style Dictionary, or a script that walks `$value` fields and resolves each alias against the token tree.
 
 ### 2. Map Figma auto-layout to flex/grid
 
@@ -115,7 +117,7 @@ Run Storybook locally to spot-check visual fidelity against the Figma designs:
 npx storybook dev -p 6006
 ```
 
-Use the official Figma MCP read tools (`get_design_context`, `search_design_system`) via the **figma@claude-plugins-official** companion plugin to inspect the live Figma design and confirm pixel-level alignment with the implementation.
+Use the official Figma MCP read tools (`get_design_context`, `search_design_system`) via the **`figma`** companion plugin to inspect the live Figma design and confirm pixel-level alignment with the implementation.
 
 ### 6. Export a clean public API
 

@@ -30,7 +30,7 @@ Confirm the project has a `figma.config.json` (or `codeConnect` field in `packag
 
 ### 2. Discover components to map
 
-Use the official Figma MCP (from the `figma@claude-plugins-official` companion) to enumerate the publishable components in the file:
+Use the official Figma MCP (from the `figma` companion plugin) to enumerate the publishable components in the file:
 
 ```
 search_design_system / get_design_context → list components and component sets

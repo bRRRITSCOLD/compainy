@@ -52,7 +52,7 @@ All I/O is `async/await`. Never mix raw Promises and async/await in the same cal
 ### Rust
 
 **Traits as interfaces.**
-Define a trait per port (`Repository`, `EventBus`, `Clock`). Implement for concrete types (`PgRepository`, `KafkaEventBus`). For tests, implement the trait on a simple in-memory struct. Use `async_trait` for async trait methods until native async traits stabilize.
+Define a trait per port (`Repository`, `EventBus`, `Clock`). Implement for concrete types (`PgRepository`, `KafkaEventBus`). For tests, implement the trait on a simple in-memory struct. Use `async_trait` (or manual `Pin<Box<dyn Future>>`) for async methods on `dyn`-dispatched traits, since `async fn` in traits is not yet object-safe for dynamic dispatch.
 
 **Ownership-aware design.**
 Prefer `Arc<dyn Trait>` for shared service handles injected across async tasks. Avoid `Rc` in multi-threaded code. Use `tokio::sync::Mutex` sparingly — structure data access to minimize lock scope. Design the domain so owned types flow naturally; reach for shared references only at the boundary.

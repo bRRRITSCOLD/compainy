@@ -38,11 +38,7 @@ The `figma` companion installs the official Figma MCP **remote** server. Authent
 
 **Write-to-canvas requires a Figma Full seat on a paid plan.** A Dev seat cannot write to the canvas outside of drafts, so the ux-designer's authoring tools — creating frames, components, and variables — will not work without a Full seat.
 
-Install the `figma-use` skill to unlock write workflows for the ux-designer:
-
-```
-/skill install figma-use
-```
+Install Figma's `figma-use` skill so the agent drives the write tools reliably — follow Figma's MCP setup docs (https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server).
 
 Read tools used by the frontend-engineer work at any seat level.
 
