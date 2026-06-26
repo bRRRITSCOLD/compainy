@@ -1,6 +1,6 @@
 ---
 name: principles-tdd
-description: Applies test-driven development discipline and defines the unit/integration/e2e test tier conventions. Invoked when an engineer is writing tests, practicing TDD, working test-first, implementing any behavior before or alongside writing tests, choosing between unit vs integration vs e2e tests, writing integration tests with Docker or LocalStack, setting up Playwright e2e tests, or naming test files. Governs red/green/refactor rhythm, test scope, test tiers, and when to commit. Cross-references superpowers test-driven-development for deeper guidance.
+description: Applies test-driven development discipline and defines the unit/integration/e2e test tier conventions. Invoked when an engineer is writing tests, practicing TDD, working test-first, implementing any behavior before or alongside writing tests, choosing between unit vs integration vs e2e tests, writing integration tests with Docker or LocalStack, setting up Playwright e2e tests, naming test files, using build tags for Go tests, go:build integration or e2e constraints, or testify suite lifecycle hooks (SetupSuite, SetupTest, TearDownTest, TearDownSuite). Governs red/green/refactor rhythm, test scope, test tiers, and when to commit. Cross-references superpowers test-driven-development for deeper guidance.
 ---
 
 # TDD Principle
@@ -32,15 +32,47 @@ Each green bar is a known-good checkpoint. Commit before refactoring so you can 
 
 ## Test tiers
 
-**File naming is the tier contract.** Every test file lives next to the code it covers and its suffix signals scope and cost.
+**File naming and build tags are the tier contract.** Every test file lives next to the code it covers. In TypeScript the suffix signals scope; in Go the suffix plus a build-tag header gates which tier `go test` compiles.
 
 | Tier | TypeScript | Go | Scope |
 |---|---|---|---|
-| unit | `*.unit.test.ts` / `*.unit.test.tsx` | `*_unit_test.go` | Single unit; no I/O; runs in milliseconds. |
-| integration | `*.integration.test.ts` / `*.integration.test.tsx` | `*_integration_test.go` | Multiple pieces together with real adapters or controlled substitutes. |
-| e2e | `*.e2e.test.ts` / `*.e2e.test.tsx` | `*_e2e_test.go` | Full app or SDK exercised through its public surface. |
+| unit | `*.unit.test.ts` / `*.unit.test.tsx` | `*_test.go` (no build tag) | Single unit; no I/O; runs in milliseconds. |
+| integration | `*.integration.test.ts` / `*.integration.test.tsx` | `*_integration_test.go` + `//go:build integration` | Multiple pieces together with real adapters or controlled substitutes. |
+| e2e | `*.e2e.test.ts` / `*.e2e.test.tsx` | `*_e2e_test.go` + `//go:build e2e` | Full app or SDK exercised through its public surface. |
 
-**Go**: `go test` only discovers files ending in `_test.go`; the tier name is an infix (`*_unit_test.go`), not a separate extension like `.test.go`.
+**Go build-tag gate (Go 1.17+).** Unit tests use the plain `*_test.go` suffix with no build tag — `go test ./...` compiles and runs only this tier by default. Integration and e2e files must begin with a build-tag header followed by a blank line before the `package` declaration (the blank line is required; without it the directive is ignored):
+
+```go
+//go:build integration
+
+package foo_test
+```
+
+The tag keeps tiers strictly separate: `go test ./...` excludes tagged files; tagged tiers compile in only with `-tags=integration` or `-tags=e2e`.
+
+**Run commands (Go).**
+
+```sh
+# Unit — default, no tag (runs on every PR)
+go test -race -count=1 ./...
+
+# Integration
+go test -tags=integration -race -count=1 ./...
+
+# e2e
+go test -tags=e2e -race -count=1 ./...
+```
+
+Make targets: `make test-unit | test-integration | test-e2e | test`
+
+**Go test naming — `TestSubject_Scenario_Expectation` (Roy Osherove xUnit style).** Every exported Go test function follows this three-part pattern. Add a one-line doc comment above each function; it surfaces in `go test -v` output and `go doc`:
+
+```go
+// TestOrderService_CreateOrder_ReturnsOrderIDOnSuccess verifies that a valid command
+// produces a new order with a non-empty ID.
+func TestOrderService_CreateOrder_ReturnsOrderIDOnSuccess(t *testing.T) { ... }
+```
+
 **Playwright**: TypeScript-only. The Go e2e tier covers HTTP-SDK/API tests, not UI automation.
 
 **unit** — isolated. No database, no network, no filesystem. External dependencies are test doubles injected via interfaces (see `principles-pragmatic-solid`). The full unit suite runs in seconds.
@@ -56,41 +88,70 @@ Each green bar is a known-good checkpoint. Commit before refactoring so you can 
 - UI: **Playwright** against `localhost` (TypeScript-only). Start the dev/test server before the suite; shut it down after. Go e2e tests cover HTTP-SDK/API tests, not UI automation.
 
 **Setup/teardown at every level.**
-Every test file — regardless of tier — must include `beforeAll` / `beforeEach` / `afterEach` / `afterAll` blocks, even if empty. Establish the scaffold upfront so setup and teardown are never retrofitted later:
+Every test file — regardless of tier — must define all four lifecycle hooks, even if empty. Establish the scaffold upfront so setup and teardown are never retrofitted later.
+
+TypeScript (Jest / Vitest):
 
 ```ts
-// TypeScript (Jest / Vitest)
 beforeAll(async () => { /* start server, seed db, launch browser */ });
 beforeEach(async () => { /* reset state */ });
 afterEach(async () => { /* assert no leaked state */ });
 afterAll(async () => { /* stop server, close browser, drop test db */ });
 ```
 
+Go uses testify suite methods that map one-to-one to the four TypeScript hooks:
+
+| TypeScript | Go (testify suite) | Role |
+|---|---|---|
+| `beforeAll` | `SetupSuite` | Start shared resources (DB container, server) |
+| `beforeEach` | `SetupTest` | Seed fixtures, reset state |
+| `afterEach` | `TearDownTest` | Rollback, assert no leaked state |
+| `afterAll` | `TearDownSuite` | Stop shared resources |
+
+Every suite type ALWAYS defines all four methods, even if empty:
+
 ```go
-// Go
-func TestMain(m *testing.M) {
-    // beforeAll: start shared resources (DB, server, etc.)
-    code := m.Run()
-    // afterAll: stop shared resources
-    os.Exit(code)
-}
-
-// setup resets per-test state (beforeEach equivalent) and registers cleanup
-// (afterEach equivalent) via t.Cleanup so it runs automatically after each test.
-func setup(t *testing.T) {
-    t.Helper()
-    // beforeEach: reset state, seed fixtures, etc.
-    t.Cleanup(func() {
-        // afterEach: assert no leaked state, undo per-test changes
-    })
-}
-
-// Call setup(t) at the top of every test function:
-// func TestFoo(t *testing.T) {
-//     setup(t)
-//     ...
-// }
+func (s *XSuite) SetupSuite()    {}
+func (s *XSuite) SetupTest()     {}
+func (s *XSuite) TearDownTest()  {}
+func (s *XSuite) TearDownSuite() {}
 ```
+
+**No skip path.** When a service dependency (database, queue, external API) is unreachable, integration and e2e tests must `t.Fatalf(...)` — never `t.Skipf(...)`. A silent skip lets a missing dependency ride a green badge over a regression.
+
+**Integration test file example (Go).**
+
+```go
+//go:build integration
+
+package order_test
+
+import (
+    "testing"
+
+    "github.com/stretchr/testify/suite"
+)
+
+// TestOrderServiceIntegration_Suite is the testify entry point for the integration suite.
+func TestOrderServiceIntegration_Suite(t *testing.T) {
+    suite.Run(t, new(OrderServiceSuite))
+}
+
+type OrderServiceSuite struct{ suite.Suite }
+
+func (s *OrderServiceSuite) SetupSuite()    { /* start DB container; t.Fatalf if unreachable */ }
+func (s *OrderServiceSuite) SetupTest()     { /* seed fixtures */ }
+func (s *OrderServiceSuite) TearDownTest()  { /* rollback / cleanup */ }
+func (s *OrderServiceSuite) TearDownSuite() { /* stop DB container */ }
+
+// TestOrderService_CreateOrder_PersistsAndReturnsID verifies that CreateOrder
+// writes the record to the database and returns a non-empty order ID.
+func (s *OrderServiceSuite) TestOrderService_CreateOrder_PersistsAndReturnsID() {
+    // arrange / act / assert
+}
+```
+
+**Optional coverage catalog.** A root `TESTING.md` listing each test suite and what scenarios it covers (one line each) is a low-tech way to track coverage. Update it per PR — no tooling required.
 
 ## Cross-references
 
