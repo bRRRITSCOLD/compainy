@@ -19,7 +19,7 @@ Write one adapter per external system: HTTP handler, database repository, messag
 Wire dependencies in `main` (or equivalent entry point), not inside domain logic. Pass interfaces, not concretions. A service constructor that accepts an interface for its repository and its event publisher can be tested without any I/O. See `principles-pragmatic-solid` — inject behind interfaces, no interface-per-class without a second implementation.
 
 **TDD throughout.**
-Every domain behavior starts with a failing test. Use test doubles (stubs/fakes) for all ports so tests run in milliseconds with no external services. Commit at green; refactor under green. Name test files by tier: `*.unit.test.ts` / `*.unit.test.go` for isolated domain logic, `*.integration.test.ts` / `*.integration.test.go` for adapter + infrastructure tests (real DB via Docker/testcontainers, LocalStack for AWS, `supertest` for HTTP). See `principles-tdd` for the full tier conventions including e2e and the required `beforeAll`/`afterAll` scaffold.
+Every domain behavior starts with a failing test. Use test doubles (stubs/fakes) for all ports so tests run in milliseconds with no external services. Commit at green; refactor under green. Name test files by tier: `*.unit.test.ts` / `*_unit_test.go` for isolated domain logic, `*.integration.test.ts` / `*_integration_test.go` for adapter + infrastructure tests (real DB via Docker/testcontainers, LocalStack for AWS, `supertest` for HTTP). See `principles-tdd` for the full tier conventions including e2e and the required `beforeAll`/`beforeEach`/`afterEach`/`afterAll` scaffold.
 
 ---
 

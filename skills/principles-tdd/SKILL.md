@@ -34,11 +34,14 @@ Each green bar is a known-good checkpoint. Commit before refactoring so you can 
 
 **File naming is the tier contract.** Every test file lives next to the code it covers and its suffix signals scope and cost.
 
-| Tier | File pattern | Scope |
-|---|---|---|
-| unit | `*.unit.test.ts` / `*.unit.test.go` | Single unit; no I/O; runs in milliseconds. |
-| integration | `*.integration.test.ts` / `*.integration.test.go` | Multiple pieces together with real adapters or controlled substitutes. |
-| e2e | `*.e2e.test.ts` / `*.e2e.test.go` | Full app or SDK exercised through its public surface. |
+| Tier | TypeScript | Go | Scope |
+|---|---|---|---|
+| unit | `*.unit.test.ts` / `*.unit.test.tsx` | `*_unit_test.go` | Single unit; no I/O; runs in milliseconds. |
+| integration | `*.integration.test.ts` / `*.integration.test.tsx` | `*_integration_test.go` | Multiple pieces together with real adapters or controlled substitutes. |
+| e2e | `*.e2e.test.ts` / `*.e2e.test.tsx` | `*_e2e_test.go` | Full app or SDK exercised through its public surface. |
+
+**Go**: `go test` only discovers files ending in `_test.go`; the tier name is an infix (`*_unit_test.go`), not a separate extension like `.test.go`.
+**Playwright**: TypeScript-only. The Go e2e tier covers HTTP-SDK/API tests, not UI automation.
 
 **unit** — isolated. No database, no network, no filesystem. External dependencies are test doubles injected via interfaces (see `principles-pragmatic-solid`). The full unit suite runs in seconds.
 
@@ -50,7 +53,7 @@ Each green bar is a known-good checkpoint. Commit before refactoring so you can 
 
 **e2e** — full app or SDK exercised end-to-end:
 - HTTP SDK tests call the real API within its own codebase — no mocks.
-- UI: **Playwright** against `localhost`. Start the dev/test server before the suite; shut it down after.
+- UI: **Playwright** against `localhost` (TypeScript-only). Start the dev/test server before the suite; shut it down after. Go e2e tests cover HTTP-SDK/API tests, not UI automation.
 
 **Setup/teardown at every level.**
 Every test file — regardless of tier — must include `beforeAll` / `beforeEach` / `afterEach` / `afterAll` blocks, even if empty. Establish the scaffold upfront so setup and teardown are never retrofitted later:
@@ -66,12 +69,27 @@ afterAll(async () => { /* stop server, close browser, drop test db */ });
 ```go
 // Go
 func TestMain(m *testing.M) {
-    // setup (beforeAll equivalent)
+    // beforeAll: start shared resources (DB, server, etc.)
     code := m.Run()
-    // teardown (afterAll equivalent)
+    // afterAll: stop shared resources
     os.Exit(code)
 }
-// Use t.Cleanup(func() { ... }) for per-test teardown (afterEach equivalent).
+
+// setup resets per-test state (beforeEach equivalent) and registers cleanup
+// (afterEach equivalent) via t.Cleanup so it runs automatically after each test.
+func setup(t *testing.T) {
+    t.Helper()
+    // beforeEach: reset state, seed fixtures, etc.
+    t.Cleanup(func() {
+        // afterEach: assert no leaked state, undo per-test changes
+    })
+}
+
+// Call setup(t) at the top of every test function:
+// func TestFoo(t *testing.T) {
+//     setup(t)
+//     ...
+// }
 ```
 
 ## Cross-references
