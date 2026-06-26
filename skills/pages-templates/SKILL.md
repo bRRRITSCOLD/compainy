@@ -1,6 +1,6 @@
 ---
 name: pages-templates
-description: Composes React routes and layout templates with TanStack Start from the component library, following the UX designer's page and template structure. Invoked when the user says "build pages", "compose templates", "implement the layout", "turn this design into a route", "wire up the page structure", "scaffold TanStack Start routes from designs", "implement the template layer", "build page from Figma", "add a form", "build a form", "tanstack form", "tanstack form useForm", or "form validation". Keeps routes thin and pushes domain logic to the backend.
+description: Composes React routes and layout templates with TanStack Start from the component library, following the UX designer's page and template structure. Invoked when the user says "build pages", "compose templates", "implement the layout", "turn this design into a route", "wire up the page structure", "scaffold TanStack Start routes from designs", "implement the template layer", "build page from Figma", "add a form", "build a form", "tanstack form", "tanstack form useForm", "form validation", "nuqs", "url state", "query state", "useQueryState", "url search params", or "query params". Keeps routes thin and pushes domain logic to the backend.
 ---
 
 # Pages & Templates Skill
@@ -303,6 +303,170 @@ describe('SignupForm', () => {
   });
 });
 ```
+
+### 5b. URL query-param state with nuqs
+
+Use **nuqs** for ergonomic, type-safe URL search-param state owned at the component level. Filter dropdowns, pagination controls, tab switchers, and search inputs become bookmarkable and shareable with no boilerplate.
+
+> **When to use which:** Use nuqs for component-local URL state (filters, tabs, pagination, search box). Use TanStack Router's native `validateSearch` + `Route.useSearch()` for route-contract params that loaders read.
+
+#### Install
+
+```bash
+npm install nuqs
+```
+
+#### Adapter setup
+
+nuqs requires a `NuqsAdapter` at the root of the React tree. The `nuqs/adapters/tanstack-router` adapter exists but is **experimental and does not yet cover TanStack Start**. Until official TanStack Start support lands, use the generic React SPA adapter in the root route:
+
+```tsx
+// src/routes/__root.tsx
+import { NuqsAdapter } from 'nuqs/adapters/react';
+import { Outlet, createRootRoute } from '@tanstack/react-router';
+
+export const Route = createRootRoute({
+  component: () => (
+    <NuqsAdapter>
+      <Outlet />
+    </NuqsAdapter>
+  ),
+});
+```
+
+Once nuqs officially supports TanStack Start, swap to `nuqs/adapters/tanstack-router`.
+
+#### Core hooks and parsers
+
+```tsx
+import {
+  useQueryState,
+  useQueryStates,
+  parseAsString,
+  parseAsInteger,
+  parseAsBoolean,
+  parseAsArrayOf,
+  parseAsStringEnum,
+} from 'nuqs';
+```
+
+**`useQueryState`** — single param, `useState`-style API synced to the URL:
+
+```tsx
+// ?search=foo
+const [search, setSearch] = useQueryState('search', parseAsString.withDefault(''));
+
+// ?page=2
+const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+
+// ?active=true
+const [active, setActive] = useQueryState('active', parseAsBoolean.withDefault(false));
+
+// ?tab=overview  (constrained to a known set)
+const [tab, setTab] = useQueryState(
+  'tab',
+  parseAsStringEnum(['overview', 'activity', 'settings'] as const).withDefault('overview'),
+);
+
+// ?tags=react,typescript  (multi-value; custom separator: parseAsArrayOf(parseAsString, '+'))
+const [tags, setTags] = useQueryState('tags', parseAsArrayOf(parseAsString).withDefault([]));
+```
+
+**`useQueryStates`** — multiple params as one object; all updates land in a single history entry:
+
+```tsx
+const [filters, setFilters] = useQueryStates({
+  search: parseAsString.withDefault(''),
+  page:   parseAsInteger.withDefault(1),
+  status: parseAsStringEnum(['open', 'closed', 'all'] as const).withDefault('all'),
+});
+
+setFilters({ page: 2 });                   // partial merge — other params unchanged
+setFilters({ search: 'query', page: 1 }); // reset page when search changes
+```
+
+#### Parsers reference
+
+| Parser | URL form | JS type | Notes |
+|---|---|---|---|
+| `parseAsString` | `?k=foo` | `string` | URL-decoded |
+| `parseAsInteger` | `?k=42` | `number` | Integers only; invalid → `null` |
+| `parseAsBoolean` | `?k=true` | `boolean` | Accepts `true` / `false` |
+| `parseAsArrayOf(p)` | `?k=a,b` | `T[]` | Wraps any parser; separator configurable via `parseAsArrayOf(parser, separator)` |
+| `parseAsStringEnum([…])` | `?k=val` | `'a'\|'b'\|…` | Rejects values outside the set |
+
+Chain `.withDefault(value)` on any parser to eliminate `null` from the return type.
+
+#### Example — filterable list
+
+```tsx
+function ProductList() {
+  const [filters, setFilters] = useQueryStates({
+    q:       parseAsString.withDefault(''),
+    page:    parseAsInteger.withDefault(1),
+    inStock: parseAsBoolean.withDefault(false),
+  });
+
+  return (
+    <div>
+      <input
+        value={filters.q}
+        onChange={(e) => setFilters({ q: e.target.value, page: 1 })}
+        placeholder="Search…"
+      />
+      <label>
+        <input
+          type="checkbox"
+          checked={filters.inStock}
+          onChange={(e) => setFilters({ inStock: e.target.checked, page: 1 })}
+        />
+        In stock only
+      </label>
+      {/* pass filters.q, filters.inStock, filters.page to data-fetching hook */}
+      <Pagination current={filters.page} onChange={(page) => setFilters({ page })} />
+    </div>
+  );
+}
+```
+
+#### Test nuqs components with `NuqsTestingAdapter`
+
+Wrap the component under test with `NuqsTestingAdapter` from `nuqs/adapters/testing` — no real router required:
+
+```tsx
+// src/routes/products.unit.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
+import { NuqsTestingAdapter } from 'nuqs/adapters/testing';
+import { ProductList } from './products';
+
+describe('ProductList', () => {
+  beforeAll(async () => {});
+  beforeEach(async () => {});
+  afterEach(async () => {});
+  afterAll(async () => {});
+
+  it('resets page to 1 when the search query changes', async () => {
+    const onUrlUpdate = vi.fn();
+    render(
+      <NuqsTestingAdapter searchParams="?page=3" onUrlUpdate={onUrlUpdate}>
+        <ProductList />
+      </NuqsTestingAdapter>,
+    );
+    fireEvent.change(screen.getByPlaceholderText(/search/i), { target: { value: 'widget' } });
+    // nuqs must have called onUrlUpdate, and the new query string must not carry page=3
+    expect(onUrlUpdate).toHaveBeenCalled();
+    expect(onUrlUpdate.mock.calls.at(-1)[0].queryString).toContain('page=1');
+  });
+});
+```
+
+#### nuqs vs TanStack Router native search — decision table
+
+| Scenario | Tool |
+|---|---|
+| Loader fetches data keyed to a param (e.g. `/products?category=shoes`) | `validateSearch` + `Route.useSearch()` |
+| Component-local filter, tab, search box, or pagination not read by a loader | nuqs `useQueryState` / `useQueryStates` |
 
 ### 6. Keep routes thin — enforce the boundary
 
