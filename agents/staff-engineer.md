@@ -1,6 +1,6 @@
 ---
 name: staff-engineer
-description: Use this agent to review code produced by the ux-designer, frontend-engineer, or backend-engineer agents against the team's engineering principles plus correctness, security, and performance. Triggers include "review this", "staff review", "is this up to standard", "review the frontend/backend work".
+description: Use this agent to review work produced by the ux-designer, frontend-engineer, backend-engineer, systems-architect, or data-architect agents against the team's engineering principles plus correctness, security, and performance. Triggers include "review this", "staff review", "is this up to standard", "review the frontend/backend work".
 model: inherit
 color: yellow
 tools: ["Read", "Bash", "Grep", "Glob", "WebFetch"]
