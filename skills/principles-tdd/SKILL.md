@@ -30,6 +30,45 @@ Use ports/adapters (interfaces + test doubles) to keep tests free of I/O, clocks
 **Commit at green.**
 Each green bar is a known-good checkpoint. Commit before refactoring so you can roll back cheaply if the refactor breaks things.
 
+## Test naming — Subject_Scenario_Expectation
+
+**Every test case, in every language, is named `Subject_Scenario_Expectation`** (Roy Osherove xUnit three-part style). The name alone must identify the failure in CI without opening the source file. Add a one-line intent description alongside each case.
+
+- **Subject** — the unit under test (class, function, component, page, or route).
+- **Scenario** — the condition or input state being exercised.
+- **Expectation** — the observable outcome that should result.
+
+**Go.** The exported function name encodes all three parts. A one-line doc comment above the function surfaces in `go test -v` output and `go doc`:
+
+```go
+// TestOrderService_CreateOrder_ReturnsOrderIDOnSuccess verifies that a valid command
+// produces a new order with a non-empty ID.
+func TestOrderService_CreateOrder_ReturnsOrderIDOnSuccess(t *testing.T) { ... }
+```
+
+Inside a testify suite the method follows the same pattern:
+
+```go
+func (s *OrderServiceSuite) TestOrderService_CreateOrder_PersistsAndReturnsID() { ... }
+```
+
+**TypeScript / JS (Vitest · Jest).** The `describe(...)` block names the Subject; the `it(...)` / `test(...)` string carries the full `Subject_Scenario_Expectation` name so the title is self-describing in CI output independent of nesting:
+
+```ts
+describe('SignupForm', () => {
+  it('SignupForm_InvalidEmail_ShowsValidationError', async () => { ... });
+  it('SignupForm_EmptyEmail_ShowsRequiredError', async () => { ... });
+});
+```
+
+**Playwright (e2e UI).** The `test(...)` title is the full three-part name:
+
+```ts
+test('CheckoutFlow_EmptyCart_RedirectsToProductsPage', async ({ page }) => { ... });
+```
+
+All per-tier guidance below applies this invariant. The tier (unit / integration / e2e) is encoded in the file name suffix, not the test title.
+
 ## Test tiers
 
 **File naming and build tags are the tier contract.** Every test file lives next to the code it covers. In TypeScript the suffix signals scope; in Go the suffix plus a build-tag header gates which tier `go test` compiles.
@@ -65,13 +104,7 @@ go test -tags=e2e -race -count=1 ./...
 
 Make targets: `make test-unit | test-integration | test-e2e | test`
 
-**Go test naming — `TestSubject_Scenario_Expectation` (Roy Osherove xUnit style).** Every exported Go test function follows this three-part pattern. Add a one-line doc comment above each function; it surfaces in `go test -v` output and `go doc`:
-
-```go
-// TestOrderService_CreateOrder_ReturnsOrderIDOnSuccess verifies that a valid command
-// produces a new order with a non-empty ID.
-func TestOrderService_CreateOrder_ReturnsOrderIDOnSuccess(t *testing.T) { ... }
-```
+**Go test naming.** The `TestSubject_Scenario_Expectation` three-part name (see **Test naming** above) is encoded directly in the exported function or suite method; a one-line doc comment goes above the declaration. The integration file example below shows both in full context.
 
 **Playwright**: TypeScript-only. The Go e2e tier covers HTTP-SDK/API tests, not UI automation.
 

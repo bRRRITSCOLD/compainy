@@ -210,7 +210,31 @@ Key rules:
 
 For each component, follow the red/green/refactor cycle:
 
-1. **Red**: Write `Button.unit.test.tsx` asserting the expected rendered output, accessible role, and prop variations. Run — confirm failure. (Use `*.unit.test.tsx` for isolated component tests — see `principles-tdd` for the full unit/integration/e2e tier conventions.)
+1. **Red**: Write `Button.unit.test.tsx` asserting the expected rendered output, accessible role, and prop variations. Run — confirm failure. (Use `*.unit.test.tsx` for isolated component tests — see `principles-tdd` for the full unit/integration/e2e tier conventions.) Name every `it(...)` in `Subject_Scenario_Expectation` form (see `principles-tdd` **Test naming** section):
+
+```tsx
+// src/components/Button/Button.unit.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  beforeAll(async () => {});
+  beforeEach(async () => {});
+  afterEach(async () => {});
+  afterAll(async () => {});
+
+  it('Button_PrimaryVariant_RendersWithPrimaryClasses', () => {
+    render(<Button variant="primary">Save</Button>);
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveClass('bg-background-primary');
+  });
+
+  it('Button_DisabledState_DisablesPointerEvents', () => {
+    render(<Button disabled>Save</Button>);
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+});
+```
+
 2. **Green**: Implement `Button.tsx` with the minimum code to pass. Reference only token-based CSS vars or Tailwind classes derived from the token theme.
 3. **Refactor**: Extract shared sub-patterns (e.g., a `useTokenClass` utility) only when they appear in three or more components.
 
