@@ -1,27 +1,47 @@
 ---
 name: figma-design-system
-description: Extracts design tokens and codifies a design system from Figma. Invoked when the user says "build a design system from Figma", "extract design tokens", "extract Figma variables", "codify design system", "pull tokens from Figma", or "generate tokens.json". Uses the figma-dev-mode MCP to read the current selection, variables, and styles — read-only; does not draw or author frames in Figma.
+description: Builds and maintains a design system in Figma, then extracts and codifies it for code consumers. Invoked when the user says "build a design system in Figma", "create components in Figma", "extract design tokens", "extract Figma variables", "codify design system", "pull tokens from Figma", or "generate tokens.json". Uses the official Figma MCP (figma@claude-plugins-official) to create frames, components, variables, and styles — and to read/export them as tokens.json.
 ---
 
 # Figma Design System Skill
 
-Extract design intent from Figma and codify it as a portable, W3C design-tokens–style `tokens.json` plus a human-readable design-system spec. The agent reads; it does not draw.
+Build design systems directly in Figma using the official Figma MCP write tools, then extract and codify design intent as a portable, W3C design-tokens–style `tokens.json` plus a human-readable design-system spec. The design system in Figma is the source of truth; `tokens.json` is the code mirror for the frontend.
 
-**Read-only boundary:** Official Dev Mode MCP reads designs and powers Code Connect; it does not author design systems inside Figma.
+> **Seat requirement:** Writing to the Figma canvas requires a Figma Full seat on a paid plan (Dev seat = read-only outside drafts).
+
+For write mechanics (`use_figma`, `create_new_file`, `generate_figma_design`), defer to the **`figma-use`** skill — it provides the reliable workflow patterns for driving Figma write tools.
 
 ## Process
 
-### 1. Connect and read
+### 1. Build the design system in Figma
 
-Use the `figma-dev-mode` MCP (declared in the plugin manifest at `http://127.0.0.1:3845/mcp`). The MCP provides read tools for inspecting the live Figma file:
+Use the official Figma MCP write tools (via the `figma@claude-plugins-official` companion plugin) to create or extend the design system directly in Figma. Defer to the **`figma-use`** skill for step-by-step write mechanics.
 
-- `get_selection` — inspect the currently selected node(s) and their computed properties.
-- `get_variables` / `get_local_variable_collections` — enumerate all design variables (color, number, string, boolean) and their mode values.
-- `get_styles` — read named styles (color, text, effect, grid).
+Key write operations:
+- `create_new_file` — create a new Figma file for the design system if one does not exist.
+- `generate_figma_design` — generate frames, component structures, and layout from a prompt or spec.
+- `use_figma` — the general-purpose write tool for creating/editing/deleting frames, components, variables, color styles, text styles, and auto-layout. Use this to:
+  - Define color variable collections (light/dark modes)
+  - Define typography styles (font families, sizes, weights, line-height)
+  - Define spacing, radius, and shadow variables
+  - Build component sets with variants (e.g. Button: size × variant × state)
+  - Set up auto-layout on frames and components
 
-Call these tools in sequence. If no selection exists, read document-level variables and styles first; narrow to components once the token vocabulary is established.
+Structure the file with dedicated pages:
+- **Foundations** — color, typography, spacing, radius, shadow variables
+- **Components** — component sets, documented with variants
+- **Templates** — page-level layout examples
 
-### 2. Categorize tokens
+### 2. Read and inspect
+
+After building (or when working from an existing file), read the design system state using the MCP read tools:
+- `get_variable_defs` / `get_local_variable_collections` — enumerate all design variables and their mode values.
+- `get_design_context` — inspect frames, components, and their computed properties.
+- `get_metadata` — file metadata and structure.
+- `search_design_system` — search for components, styles, and variables by name.
+- `get_libraries` — list shared libraries linked to the file.
+
+### 3. Categorize tokens
 
 Map Figma primitives to W3C design-token categories:
 
@@ -36,9 +56,9 @@ Map Figma primitives to W3C design-token categories:
 
 Separate **primitive tokens** (raw values, e.g. `color.blue.500`) from **semantic tokens** (role-mapped aliases, e.g. `color.background.primary → {color.blue.500}`).
 
-### 3. Output `tokens.json`
+### 4. Output `tokens.json` (code mirror for the frontend)
 
-Emit a W3C Design Tokens Community Group (DTCG) format file:
+Emit a W3C Design Tokens Community Group (DTCG) format file when a code mirror is needed for the frontend engineer:
 
 ```json
 {
@@ -73,9 +93,9 @@ Emit a W3C Design Tokens Community Group (DTCG) format file:
 
 Write the file to the project root as `tokens.json`. If CSS custom properties are also needed, emit a `tokens.css` companion using `--token-name: value;` conventions (kebab-case, e.g. `--color-background-primary`).
 
-### 4. Record auto-layout intent
+### 5. Record auto-layout intent
 
-For each auto-layout frame or component in the selection, note in the design-system spec:
+For each auto-layout frame or component, note in the design-system spec:
 
 - **Direction** → CSS `flex-direction` (`row` / `column`)
 - **Spacing mode** (packed vs. space-between) → `justify-content`
@@ -86,18 +106,18 @@ For each auto-layout frame or component in the selection, note in the design-sys
 
 Write these as annotated component layout specs in `design-system.md` so the frontend engineer can reproduce layout in CSS/Tailwind without guessing.
 
-### 5. Write the design-system spec
+### 6. Write the design-system spec
 
 Produce `design-system.md` alongside `tokens.json`. Include:
 
 1. **Token inventory** — summary table of each category and token count.
-2. **Component inventory** — list of top-level component sets found in the selection.
-3. **Auto-layout intent** — per-component flex/grid mappings from step 4.
+2. **Component inventory** — list of top-level component sets in the Figma file.
+3. **Auto-layout intent** — per-component flex/grid mappings from step 5.
 4. **Typography scale** — rendered table of all text styles with computed values.
 5. **Color palette** — primitive palette + semantic role mapping.
 6. **Usage notes** — any Figma constraints, mode variants (light/dark), or missing mappings that need designer clarification.
 
-### 6. Validate before handing off
+### 7. Validate before handing off
 
 - Confirm every `$value` that is a reference (`{token.path}`) resolves to a defined token — no dangling references.
 - Confirm `tokens.json` is valid JSON (`Bash: node -e "JSON.parse(require('fs').readFileSync('tokens.json','utf8'))" && echo valid`).

@@ -17,7 +17,7 @@ npx figma connect --help   # check if already available
 npm install --save-dev @figma/code-connect
 ```
 
-Confirm the project has a `figma.config.json` (or `figma` field in `package.json`) with `documentUrl` set to the target Figma file URL. Create it if absent:
+Confirm the project has a `figma.config.json` (or `codeConnect` field in `package.json`) with `documentUrl` set to the target Figma file URL. Create it if absent:
 
 ```json
 {
