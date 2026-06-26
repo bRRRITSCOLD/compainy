@@ -43,13 +43,26 @@ For Tailwind projects (the default), emit `tailwind.tokens.js` that extends the 
 
 ```js
 // tokens/tailwind.tokens.js — generated from tokens.json, do not edit by hand
-const tokens = require('../tokens.json'); // pre-resolved by build script
+// ESM module — requires "type": "module" in package.json (or rename to .mjs)
+import { readFileSync } from 'fs';
+
+const tokens = JSON.parse(readFileSync(new URL('../tokens.json', import.meta.url)));
+
+// Convert camelCase DTCG token keys to kebab-case for Tailwind utility classes.
+// e.g. "primaryHover" → "primary-hover" → bg-background-primary-hover resolves.
+function toKebab(str) {
+  return str.replace(/([A-Z])/g, (m) => `-${m.toLowerCase()}`);
+}
 
 /** @type {import('tailwindcss').Config['theme']} */
-module.exports = {
+const tokenTheme = {
   colors: {
     blue: { 500: tokens.color.blue['500'].$value },
-    background: { primary: tokens.color.background.primary.$value },
+    background: Object.fromEntries(
+      Object.entries(tokens.color.background).map(([k, v]) => [toKebab(k), v.$value])
+    ),
+    // After toKebab, keys become: "primary", "primary-hover"
+    // → bg-background-primary, bg-background-primary-hover
   },
   spacing: {
     4: tokens.spacing['4'].$value,   // "16px"
@@ -64,6 +77,8 @@ module.exports = {
     sm: `${tokens.shadow.sm.$value.offsetX} ${tokens.shadow.sm.$value.offsetY} ${tokens.shadow.sm.$value.blur} ${tokens.shadow.sm.$value.spread} ${tokens.shadow.sm.$value.color}`,
   },
 };
+
+export default tokenTheme;
 ```
 
 Reference it in `tailwind.config.ts`:
@@ -119,7 +134,7 @@ src/
       index.ts            # barrel export
   tokens/
     tokens.css            # generated CSS custom properties
-    tailwind.tokens.js    # generated Tailwind theme extension (if applicable)
+    tailwind.tokens.js    # generated Tailwind theme extension (Tailwind is the default)
   index.ts                # public API barrel
 ```
 
@@ -158,7 +173,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:   'bg-background-primary text-white hover:bg-background-primaryHover',
+        primary:   'bg-background-primary text-white hover:bg-background-primary-hover',
         secondary: 'border border-current bg-transparent hover:bg-background-primary/10',
         ghost:     'bg-transparent hover:bg-background-primary/10',
       },
@@ -229,7 +244,7 @@ The library's `src/index.ts` barrel must satisfy interface segregation (`princip
 
 ```ts
 // src/index.ts — public API
-export { Button } from './components/Button';
+export { Button, buttonVariants } from './components/Button';
 export type { ButtonProps } from './components/Button';
 export { Card } from './components/Card';
 export type { CardProps } from './components/Card';
