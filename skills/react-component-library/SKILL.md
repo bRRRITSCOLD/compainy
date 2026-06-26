@@ -5,7 +5,7 @@ description: Builds a reusable, accessible, typed React/Next.js component librar
 
 # React Component Library Skill
 
-Build a reusable, accessible, type-safe React component library that is a faithful code mirror of the Figma design system. `tokens.json` (W3C DTCG format, produced by the `figma-design-system` skill) is the single source of truth for all visual values — never hard-code a color, size, or shadow.
+Build a reusable, accessible, type-safe React component library that is a faithful code mirror of the Figma design system. The library is framework-agnostic and designed to compose cleanly into TanStack Start routes and layout templates — no framework-specific imports, no RSC assumptions. `tokens.json` (W3C DTCG format, produced by the `figma-design-system` skill) is the single source of truth for all visual values — never hard-code a color, size, or shadow.
 
 ## Process
 

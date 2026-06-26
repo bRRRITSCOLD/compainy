@@ -5,7 +5,7 @@ description: Composes React/Next.js pages and layout templates from the componen
 
 # Pages & Templates Skill
 
-Compose the built React component library into layout templates and Next.js page routes that faithfully implement the UX designer's page/template structure. Pages are thin coordinators — they fetch or receive data and delegate rendering to components. Domain logic lives in the backend or in dedicated service modules, never in pages.
+Compose the built React component library into layout templates and TanStack Start file-based routes that faithfully implement the UX designer's page/template structure. Routes are thin coordinators — they fetch data via typed loaders and delegate rendering to components. Domain logic lives in the backend or in dedicated service modules, never in routes.
 
 ## Process
 
@@ -16,13 +16,13 @@ Before writing any code, read the UX designer's outputs:
 - Use the Figma MCP read tools (`get_design_context`, `search_design_system`) via the **`figma`** companion plugin to inspect the **Templates** and **Pages** sections of the Figma file.
 - Identify the layout regions (header, sidebar, main, footer), the component slots each region contains, and the responsive breakpoints specified in the design.
 
-Map the Figma frame hierarchy to a Next.js route:
+Map the Figma frame hierarchy to a TanStack Start route:
 
-| Figma structure | Next.js output |
+| Figma structure | TanStack Start output |
 |---|---|
 | `Templates / Dashboard Layout` | `src/templates/DashboardLayout.tsx` |
-| `Pages / Dashboard` | `src/app/dashboard/page.tsx` (App Router) or `src/pages/dashboard.tsx` (Pages Router) |
-| `Pages / Settings` | `src/app/settings/page.tsx` |
+| `Pages / Dashboard` | `src/routes/dashboard.tsx` |
+| `Pages / Settings` | `src/routes/settings.tsx` |
 
 ### 2. Build layout templates first
 
@@ -53,23 +53,29 @@ Use token-derived CSS classes or CSS custom properties for layout dimensions (gr
 
 Apply `principles-ddd` bounded-context thinking: the template layer is a presentation concern. It knows nothing about domain concepts like `Order`, `User`, or `Product` — it only knows about layout slots and presentational component props.
 
-### 3. Implement Next.js pages
+### 3. Implement TanStack Start routes
 
-Pages are thin orchestrators. Their responsibilities:
-- Declare the route (file path = URL).
-- Fetch or receive data via `getServerSideProps`, `getStaticProps`, React Server Components, or a data hook.
+Routes are thin orchestrators. Their responsibilities:
+- Declare the route via `createFileRoute` (file path = URL segment).
+- Fetch data in the typed `loader` function; the component reads it via `Route.useLoaderData()`.
 - Pass data as props to the template and components.
 - Handle loading and error states with skeleton or error boundary components from the library.
 
 ```tsx
-// src/app/dashboard/page.tsx (Next.js App Router)
+// src/routes/dashboard.tsx
+import { createFileRoute } from '@tanstack/react-router';
 import { DashboardLayout } from '@/templates/DashboardLayout';
 import { MetricCard } from '@/components/MetricCard';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { getDashboardData } from '@/services/dashboard'; // backend service call
 
-export default async function DashboardPage() {
-  const { metrics, activity } = await getDashboardData();
+export const Route = createFileRoute('/dashboard')({
+  loader: async () => getDashboardData(),
+  component: DashboardPage,
+});
+
+function DashboardPage() {
+  const { metrics, activity } = Route.useLoaderData();
 
   return (
     <DashboardLayout>
@@ -82,7 +88,16 @@ export default async function DashboardPage() {
 }
 ```
 
-Domain logic (`getDashboardData`) lives in `src/services/` or the backend API — never inline in the page. The page is a thin coordinator; it does not compute, filter, sort, or transform domain data. See `principles-ddd`.
+For server-side logic that falls outside a loader (mutations, auth checks, third-party calls), use `createServerFn` from `@tanstack/react-start`:
+
+```tsx
+import { createServerFn } from '@tanstack/react-start';
+import { getDashboardData } from '@/services/dashboard';
+
+const fetchDashboard = createServerFn({ method: 'GET' }).handler(getDashboardData);
+```
+
+Domain logic (`getDashboardData`) lives in `src/services/` or the backend API — never inline in the route. The route is a thin coordinator; it does not compute, filter, sort, or transform domain data. See `principles-ddd`.
 
 ### 4. Map responsive breakpoints
 
@@ -96,40 +111,42 @@ Translate the Figma breakpoints to CSS / Tailwind responsive utilities. Common m
 
 For layout shifts (sidebar collapses to bottom nav on mobile), implement with CSS media queries and token-based spacing — no JavaScript-driven layout switching unless the Figma design explicitly requires it.
 
-### 5. Co-locate page tests (TDD — `principles-tdd`)
+### 5. Co-locate route tests (TDD — `principles-tdd`)
 
-For each page and template, write tests before implementation:
+For each route and template, write tests before implementation:
 
 ```tsx
-// src/app/dashboard/page.test.tsx
+// src/routes/dashboard.test.tsx
 import { render, screen } from '@testing-library/react';
-import DashboardPage from './page';
+import { RouterProvider, createMemoryHistory, createRouter } from '@tanstack/react-router';
+import { routeTree } from '@/routeTree.gen';
 
 describe('DashboardPage', () => {
   it('renders the key metrics section', async () => {
-    render(await DashboardPage());
-    expect(screen.getByRole('region', { name: /key metrics/i })).toBeInTheDocument();
+    const router = createRouter({ routeTree, history: createMemoryHistory({ initialEntries: ['/dashboard'] }) });
+    render(<RouterProvider router={router} />);
+    expect(await screen.findByRole('region', { name: /key metrics/i })).toBeInTheDocument();
   });
 });
 ```
 
-Mock backend service calls (`getDashboardData`) via dependency injection or module mocks. Pages must be independently testable without a live backend.
+Mock backend service calls (`getDashboardData`) via dependency injection or module mocks. Routes must be independently testable without a live backend.
 
-### 6. Keep pages thin — enforce the boundary
+### 6. Keep routes thin — enforce the boundary
 
-Pages must NOT:
+Routes must NOT:
 - Import domain models or aggregate types directly.
 - Contain business rules (pricing calculations, authorization logic, validation).
-- Call databases, external APIs, or file systems directly.
+- Call databases, external APIs, or file systems directly — use `createServerFn` or a backend service.
 - Hold component state that belongs in a domain store or server.
 
-If a page grows beyond ~80 lines of logic, it is absorbing domain responsibility. Extract to a service, a custom hook, or a backend route handler. See `principles-ddd`.
+If a route component grows beyond ~80 lines of logic, it is absorbing domain responsibility. Extract to a service, a custom hook, or a server function. See `principles-ddd`.
 
 ### 7. Validate before handoff
 
-- `npx tsc --noEmit` — no TypeScript errors across templates and pages.
-- `npx jest` — all page and template tests green.
-- `npx next build` — builds without error.
-- Every Figma template/page in the design system has a corresponding Next.js implementation.
-- No domain logic in page files — grep confirms: `grep -rn 'calculate\|computePrice\|validateOrder' src/app src/pages` returns nothing.
-- Pages render correctly at each defined breakpoint (verify in Storybook or a local Next.js dev server).
+- `npx tsc --noEmit` — no TypeScript errors across templates and routes.
+- `npx jest` — all route and template tests green.
+- `npx vinxi build` — builds without error.
+- Every Figma template/page in the design system has a corresponding TanStack Start route implementation.
+- No domain logic in route files — grep confirms: `grep -rn 'calculate\|computePrice\|validateOrder' src/routes` returns nothing.
+- Routes render correctly at each defined breakpoint (verify in Storybook or a local TanStack Start dev server).
