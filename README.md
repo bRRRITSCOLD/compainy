@@ -53,7 +53,7 @@ Read tools used by the frontend-engineer work at any seat level.
 | `systems-architect` | Designs system topology, defines service/bounded-context boundaries, writes ADRs, evaluates NFRs, selects technology with tradeoffs | `architecture` |
 | `staff-engineer` | Reviews all engineer output for principle compliance, correctness, security, and performance | `code-review` (read-only toolset) |
 
-All four agents also carry the shared principle skills: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss`.
+The four engineering and architecture agents — `frontend-engineer`, `backend-engineer`, `staff-engineer`, and `systems-architect` — carry all four shared principle skills: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss`. The `ux-designer` carries `principles-dry-kiss` for design-token discipline.
 
 ## Principles
 
