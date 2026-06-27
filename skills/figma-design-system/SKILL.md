@@ -11,6 +11,14 @@ Build design systems directly in Figma using the official Figma MCP write tools,
 
 For write mechanics (`use_figma`, `create_new_file`, `generate_figma_design`), defer to the **`figma-use`** skill — it provides the reliable workflow patterns for driving Figma write tools.
 
+## Write execution & verification
+
+The Figma MCP is a remote, OAuth-authenticated server. **Verify reachability before relying on it — never assert it's unavailable.**
+
+- **Probe**: call `whoami` first — success proves reachability + auth, not a write (Full) seat. Begin the build and let the first real write (`create_new_file`) test the seat. Writes go through ⇒ continue authoring directly. A reachability failure, or a seat/permission error on that first write ⇒ surface it and switch to the fallback below; don't silently skip the build.
+- **Fallback (main-session executes)**: if the MCP is unreachable from your context (a common case for a dispatched subagent hitting a remote OAuth server), do not abandon or thin the design. Produce a **complete, deterministic build spec** — every frame, component, variant, state, breakpoint, variable, and the exact `use_figma`/`generate_figma_design` calls — and hand it to the main session, which performs the writes. The designer owns every decision; the executor only types.
+- **Completeness gate**: a `tokens.json` + spec pass is *not* a built design system. "Done" requires every component authored, all breakpoints (desktop/tablet/mobile), all interactive states, Code Connect mapped where components exist, plus `tokens.json` + `design-system.md` emitted and validated. Never present a stub as the deliverable — name what's missing instead.
+
 ## Process
 
 ### 1. Build the design system in Figma
