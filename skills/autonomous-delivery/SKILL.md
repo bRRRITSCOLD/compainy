@@ -65,6 +65,20 @@ All three RUNAWAY knobs are parameterizable per run; omit any to keep its defaul
 - Via command: `/orchestrate <goal> --rounds 30 --budget 0` (`--budget 0` disables the budget check).
 - Via the Workflow tool directly: `args: { maxRounds: 30, maxEmptyRounds: 5, budgetThreshold: 0 }`. The reference script reads these from the `args` global and falls back to each default for any omitted key.
 
+## Model & effort tiering
+
+Tier the dispatched model by **task cognitive load, not by agent identity** — task complexity varies within an agent, and pinning a model in agent frontmatter is too coarse (and would override the user's session choice). Agents stay `model: inherit`; pick the tier per dispatch via the Workflow `agent()` `model`/`effort` opts (or, in `/loop` mode, by which model the dispatching step uses).
+
+| Stage | Model | Effort | Why |
+|---|---|---|---|
+| Scout (list/parse issues) | haiku | low | mechanical: run `gh`, parse JSON |
+| Implement / fix | sonnet | medium | strong, fast, cheap for spec→code |
+| **Review / re-review (the GATE)** | **inherit (session top model, e.g. Opus)** | **high** | never downgrade the gate — it's the quality backstop |
+| Merge | haiku | low | runs one `gh pr merge` |
+| Verify (CI + tests) | sonnet | low | run commands, interpret pass/fail |
+
+The reference script encodes this in its `MODEL` map and applies it per stage; override any tier via `args.models` (e.g. `args: { models: { implement: { model: 'opus' } } }`). The rule to uphold: **keep the review gate at least as strong as the implementer** — a weaker reviewer than author defeats the gate. This holds by default *as long as the session runs a top-tier model* (review omits `model`, so it inherits the session's; implement is sonnet). If you run the session on a small model, or override the tiers, preserve review ≥ implement yourself — the script does not enforce it.
+
 ## Two execution modes
 
 ### (A) Workflow tool — preferred for a bounded goal
