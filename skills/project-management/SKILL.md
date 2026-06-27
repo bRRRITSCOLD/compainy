@@ -77,6 +77,8 @@ For each ready task (status = todo, all blockers closed):
 
 Do not start step 2 until step 1 is complete. Do not start step 5 until the issue is merged and tracking is updated.
 
+**Model & effort per dispatch.** Pick the model by the task's cognitive load, not the agent's identity (agents stay `model: inherit`): cheap/fast for mechanical work (status scans, merges, validation runs), a mid tier for standard implementation, and the session's top model at high effort for architecture, data modeling, and the **staff-engineer review gate** — never downgrade the reviewer below the implementer. See `autonomous-delivery` → "Model & effort tiering" for the concrete table.
+
 ### 6. Status, blockers, and risks
 
 After each merge — or on request — post a brief status update:

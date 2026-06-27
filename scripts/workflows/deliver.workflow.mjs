@@ -30,6 +30,20 @@ const MAX_ITERATIONS   = toNum(args?.maxRounds, 20);       // hard cap on loop r
 const MAX_EMPTY_ROUNDS = toNum(args?.maxEmptyRounds, 3);   // stop after this many rounds with no merged PRs
 const BUDGET_THRESHOLD = toNum(args?.budgetThreshold, 5000); // stop if remaining tokens fall below this (0 = skip check)
 
+// --- Model & effort tiering (per dispatched stage) ---
+// Tier by cognitive load, not by agent identity. Mechanical steps run cheap;
+// the staff-engineer review GATE is never downgraded — it omits `model` so it
+// inherits the session's top model (Opus when the user runs Opus) at high effort.
+// Override any tier via args.models, e.g. args: { models: { implement: { model: 'opus' } } }.
+const MODEL = {
+  scout:     { model: 'haiku',  effort: 'low',    ...(args?.models?.scout) },
+  implement: { model: 'sonnet', effort: 'medium', ...(args?.models?.implement) },
+  fix:       { model: 'sonnet', effort: 'medium', ...(args?.models?.fix) },
+  review:    { effort: 'high',                     ...(args?.models?.review) },   // model omitted => inherit (top model); the gate stays sharp
+  merge:     { model: 'haiku',  effort: 'low',    ...(args?.models?.merge) },
+  verify:    { model: 'sonnet', effort: 'low',    ...(args?.models?.verify) },
+};
+
 // Specialist agents by label (matches GitHub issue assignment conventions)
 const SPECIALIST_MAP = {
   'backend-engineer':   'backend-engineer',
@@ -55,6 +69,7 @@ const scoutResult = await agent(
   {
     label: 'scout-issues',
     phase: 'Scout',
+    ...MODEL.scout,
     schema: {
       type: 'object',
       properties: {
@@ -105,6 +120,7 @@ if (scoutResult.error) {
       {
         label: `merge-pr-${prNumber}`,
         phase: 'Build',
+        ...MODEL.merge,
         schema: {
           type: 'object',
           properties: {
@@ -170,6 +186,7 @@ if (scoutResult.error) {
           {
             label: `implement-${iss.number}-round${iterations}-idx${idx}`,
             phase: 'Build',
+            ...MODEL.implement,
             schema: {
               type: 'object',
               properties: {
@@ -199,6 +216,7 @@ if (scoutResult.error) {
           {
             label: `review-${issue.number}-round${iterations}-idx${idx}`,
             phase: 'Build',
+            ...MODEL.review,
             schema: {
               type: 'object',
               properties: {
@@ -234,6 +252,7 @@ if (scoutResult.error) {
             {
               label: `fix-${issue.number}-round${iterations}-idx${idx}`,
               phase: 'Build',
+              ...MODEL.fix,
               schema: {
                 type: 'object',
                 properties: {
@@ -257,6 +276,7 @@ if (scoutResult.error) {
             {
               label: `rereview-${issue.number}-round${iterations}-idx${idx}`,
               phase: 'Build',
+              ...MODEL.review,
               schema: {
                 type: 'object',
                 properties: {
@@ -330,6 +350,7 @@ if (scoutResult.error) {
     {
       label: 'verify-ci',
       phase: 'Verify',
+      ...MODEL.verify,
       schema: {
         type: 'object',
         properties: {
