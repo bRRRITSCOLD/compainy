@@ -153,6 +153,14 @@ Check that all skill SKILL.md files declare a `name:` in their frontmatter:
 for f in skills/*/SKILL.md; do grep -q '^name:' "$f" && echo "ok $f" || echo "MISSING name: $f"; done
 ```
 
+Check that all command files declare a `description:` in their frontmatter:
+
+```bash
+for f in commands/*.md; do grep -q '^description:' "$f" && echo "ok $f" || echo "MISSING description: $f"; done
+```
+
+The CI gate (`node scripts/ci/validate.mjs`) runs all of these — manifests parse, agent/skill `name:` matches path, and every command has a `description:`.
+
 Verify agent `name:` matches filename:
 
 ```bash

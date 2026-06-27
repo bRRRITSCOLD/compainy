@@ -90,6 +90,21 @@ for (const dir of readdirSync(skillsDir).filter(d => statSync(join(skillsDir, d)
   }
 }
 
+// ── commands/*.md ────────────────────────────────────────────────────────────
+const commandsDir = join(ROOT, 'commands');
+try {
+  const files = readdirSync(commandsDir).filter(f => f.endsWith('.md'));
+  if (files.length) console.log('\n── commands/*.md ──');
+  for (const file of files) {
+    const fm = extractFrontmatter(readFileSync(join(commandsDir, file), 'utf8'));
+    if (!fm) { fail(`commands/${file}: no YAML frontmatter`); continue; }
+    if (/^description:\s*\S/m.test(fm)) ok(`commands/${file} has description`);
+    else fail(`commands/${file}: missing description`);
+  }
+} catch (e) {
+  if (e.code !== 'ENOENT') fail(`commands/: ${e.message}`); // no commands dir is fine
+}
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log('');
 if (failures === 0) {

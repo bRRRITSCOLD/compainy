@@ -5,4 +5,4 @@ argument-hint: <goal>
 
 Invoke the `feature-delivery` skill for the goal: $ARGUMENTS
 
-Follow the phases in order — Frame, Plan & track, Architecture, Data, Build loop, Finish — scaling each phase to the actual size of the goal. Skip phases that the goal does not need. The `feature-delivery` skill holds the full playbook.
+Follow its phases in order, scaling each to the size of the goal and skipping any the goal does not need (KISS/YAGNI). The `feature-delivery` skill holds the full playbook.
