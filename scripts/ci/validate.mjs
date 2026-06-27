@@ -24,9 +24,9 @@ function readJSON(rel) {
 function extractFrontmatter(text) {
   const lines = text.split('\n');
   if (lines[0].trim() !== '---') return null;
-  const end = lines.indexOf('---', 1);
-  if (end === -1) return null;
-  return lines.slice(1, end).join('\n');
+  const close = lines.findIndex((l, i) => i > 0 && l.trim() === '---');
+  if (close === -1) return null;
+  return lines.slice(1, close).join('\n');
 }
 
 function getFrontmatterName(fm) {
@@ -76,7 +76,7 @@ for (const file of readdirSync(agentDir).filter(f => f.endsWith('.md'))) {
 console.log('\n── skills/*/SKILL.md ──');
 
 const skillsDir = join(ROOT, 'skills');
-for (const dir of readdirSync(skillsDir)) {
+for (const dir of readdirSync(skillsDir).filter(d => statSync(join(skillsDir, d)).isDirectory())) {
   const skillFile = join(skillsDir, dir, 'SKILL.md');
   try {
     const text = readFileSync(skillFile, 'utf8');

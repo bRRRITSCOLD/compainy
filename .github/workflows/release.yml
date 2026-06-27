@@ -27,9 +27,11 @@ jobs:
 
       - name: Determine bump type
         id: bump
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
-          SUBJECT=$(printf '%s' "${{ github.event.head_commit.message }}" | head -1)
+          SUBJECT=$(printf '%s' "$COMMIT_MSG" | head -1)
           if echo "$SUBJECT" | grep -qE 'BREAKING' || echo "$SUBJECT" | grep -qE '^[a-z]+!:'; then
             BUMP=major
           elif echo "$SUBJECT" | grep -qE '^feat'; then
@@ -42,9 +44,11 @@ jobs:
 
       - name: Bump version
         id: version
+        env:
+          BUMP_TYPE: ${{ steps.bump.outputs.bump }}
         run: |
           set -euo pipefail
-          NEW=$(node scripts/ci/bump-version.mjs "${{ steps.bump.outputs.bump }}")
+          NEW=$(node scripts/ci/bump-version.mjs "$BUMP_TYPE")
           echo "new=$NEW" >> "$GITHUB_OUTPUT"
           echo "New version: $NEW"
 
@@ -52,21 +56,24 @@ jobs:
         run: node scripts/ci/validate.mjs
 
       - name: Commit and push version bump
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.new }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .claude-plugin/plugin.json
-          git commit -m "chore(release): v${{ steps.version.outputs.new }} [skip ci]"
+          git commit -m "chore(release): v${NEW_VERSION} [skip ci]"
           git push
 
       - name: Create tag and GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.version.outputs.new }}
         run: |
           set -euo pipefail
-          git tag "v${{ steps.version.outputs.new }}"
-          git push origin "v${{ steps.version.outputs.new }}"
-          gh release create "v${{ steps.version.outputs.new }}" \
-            --title "v${{ steps.version.outputs.new }}" \
+          git tag "v${NEW_VERSION}"
+          git push origin "v${NEW_VERSION}"
+          gh release create "v${NEW_VERSION}" \
+            --title "v${NEW_VERSION}" \
             --generate-notes
