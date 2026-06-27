@@ -18,6 +18,7 @@ This agent fills the discipline that otherwise gets improvised: **developer expe
 - **`devops-engineer` provisions + operates + smooths the dev loop** — IaC, CI/CD, local dev, containers, observability.
 - **`backend-engineer` writes service/domain code** — including a service's own `Dockerfile`; the devops-engineer owns the *platform* (shared infra, pipelines, local-dev orchestration, monitoring).
 - **`data-architect` decides stores**; devops provisions and operates them (managed service or container), backend models persistence.
+- **`security-architect` specs the controls** — secrets store, least-privilege CI tokens, pinned actions, encryption, secure auth flows — that this agent implements and operates; pull it in for the security posture, don't improvise it.
 
 When a task is the service's internals → backend. When it's how the service is built, shipped, run locally, or watched → devops.
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides eight specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
+This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides nine specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
 
 ### Layout
 
@@ -20,6 +20,7 @@ agents/
   devops-engineer.md   # platform & DevEx: IaC, CI/CD, local dev loop, containers, observability
   systems-architect.md # system topology, service boundaries, ADRs, NFRs, tech selection
   data-architect.md    # store selection, schema design, vector/RAG data modeling, aggregate-to-schema mapping
+  security-architect.md # threat modeling, auth/secrets/data-protection design, supply-chain, deep security review
   staff-engineer.md    # read-only reviewer against all four principle skills
   project-manager.md   # plans + tracks epics as GitHub issues; assigns agents; does not dispatch
 
@@ -40,6 +41,8 @@ skills/
   ci-cd/                   # CI/CD pipelines, build/test gates, release automation
   architecture/            # C4 diagrams, ADRs, NFRs, tech selection, evolutionary arch
   data-modeling/           # store selection, schema design, indexing, migrations, vector/RAG data design
+  threat-modeling/         # STRIDE, trust boundaries, abuse cases, ranked security requirements
+  security-review/         # deep OWASP-aligned security audit checklist (owned by security-architect)
   test-design/             # acceptance criteria + adversarial case enumeration + coverage-gap audit
   code-review/             # structured review checklist used by staff-engineer
   handoff/                 # session handoff — write before ending a work chunk

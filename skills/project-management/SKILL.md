@@ -25,6 +25,7 @@ The team of specialist agents this skill coordinates:
 | `devops-engineer` | Platform & DevEx — IaC provisioning, CI/CD, local dev loop, containers, observability |
 | `systems-architect` | System topology, ADRs, NFRs, tech selection |
 | `data-architect` | Store selection, schema design, vector/RAG data modeling |
+| `security-architect` | Threat modeling, auth/secrets/data-protection design, supply-chain, deep security review |
 | `staff-engineer` | Read-only reviewer — runs after every implementation task |
 
 ## Process

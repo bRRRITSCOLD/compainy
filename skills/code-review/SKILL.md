@@ -59,6 +59,8 @@ Work through each dimension in order. Note every finding; rank severity at the e
 
 ### 6. Security
 
+> This is the **general** security pass. For changes touching auth, cryptography, untrusted-input parsing, data exposure, infra permissions, or new dependencies, defer the deep adversarial audit to the `security-review` skill (owned by `security-architect`) rather than going shallow here.
+
 - Is user input validated and sanitized before use? Flag direct interpolation of external data into queries, commands, or templates (SQL injection, XSS, command injection).
 - Are secrets and credentials managed correctly? Flag hardcoded tokens, keys, or passwords; flag secrets logged or returned in responses.
 - Are authentication and authorization checks present at every entry point? Flag endpoints or functions that assume authorization has already been handled upstream.
