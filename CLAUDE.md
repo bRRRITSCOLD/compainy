@@ -89,7 +89,7 @@ Bullet list of skills the agent uses, one per line:
 
 The `## Operates by` section links the agent to its skills. Reference principle skills here; do not restate their rules.
 
-Keep `model: inherit` on agents — model selection is tiered at **dispatch time** by task cognitive load (cheap models for mechanical steps, the session's top model for architecture/data/review), not pinned per agent. Keep the review gate at least as strong as the implementer (holds by default when the session runs a top-tier model; not code-enforced). See `autonomous-delivery` → "Model & effort tiering".
+Keep `model: inherit` on agents — model is chosen **per dispatch** (required, by task cognitive load), not pinned per agent. An omitted model silently inherits the session's most expensive one, so dispatches must specify it. Keep the review gate at least as strong as the implementer. The rubric lives in `project-management` → "Model selection (required at dispatch)"; `autonomous-delivery` → "Model & effort tiering" applies it to the Workflow stages.
 
 ## How to add a skill
 

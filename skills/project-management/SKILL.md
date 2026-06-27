@@ -78,7 +78,22 @@ For each ready task (status = todo, all blockers closed):
 
 Do not start step 2 until step 1 is complete. Do not start step 5 until the issue is merged and tracking is updated.
 
-**Model & effort per dispatch.** Pick the model by the task's cognitive load, not the agent's identity (agents stay `model: inherit`): cheap/fast for mechanical work (status scans, merges, validation runs), a mid tier for standard implementation, and the session's top model at high effort for architecture, data modeling, and the **staff-engineer review gate** — never downgrade the reviewer below the implementer. See `autonomous-delivery` → "Model & effort tiering" for the concrete table.
+### Model selection (required at dispatch)
+
+**Always specify the model explicitly when dispatching a subagent.** An omitted model silently inherits the session's model — usually the most capable and expensive — so a loop that "doesn't pick" quietly runs every implementer and reviewer at the top tier. Choose by the task's cognitive load, not the agent's identity (agents stay `model: inherit`; the *choice* is made per dispatch, via the Agent tool's `model` param or the Workflow `agent({model})` opt).
+
+Rubric:
+
+| Task shape | Model |
+|---|---|
+| Mechanical — 1-2 files, complete spec, transcription + tests; or status scans / merges / validation runs | **cheap** (e.g. haiku) |
+| Standard — multiple files, integration concerns, pattern-matching, debugging | **standard** (e.g. sonnet) |
+| Architecture / data modeling / design judgment / broad codebase understanding | **most capable** (e.g. opus) |
+| Review — scaled to risk: a trivial change → cheap; a subtle concurrency/security/correctness change → most capable | **≥ the implementer's tier, never below it** |
+
+- **Mid-tier is the default starting point**, not the floor: the cheapest models routinely take 2-3× the turns on multi-step work, costing more overall. Reach for cheap only when the task is genuinely mechanical.
+- The **review gate** is the one deliberate exception to "always specify": dispatching it without a `model` so it inherits the session's top model is intentional (keeps the gate sharp) — that is a chosen omission, not a forgotten one. Never let the reviewer run weaker than the author.
+- `autonomous-delivery` → "Model & effort tiering" applies this rubric to the concrete Scout → Build → Verify stages.
 
 ### 6. Status, blockers, and risks
 

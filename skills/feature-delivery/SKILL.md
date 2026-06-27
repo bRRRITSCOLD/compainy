@@ -61,7 +61,7 @@ Execute the `project-management` dispatch loop — follow the `git-workflow` ski
 
 For each ready issue (wave order, blockers closed):
 
-1. **Implement** — dispatch the assigned specialist via `superpowers:subagent-driven-development`:
+1. **Implement** — dispatch the assigned specialist via `superpowers:subagent-driven-development`. **Specify the model explicitly** per the `project-management` → "Model selection (required at dispatch)" rubric — an omitted model silently inherits the session's most expensive one.
    - `backend-engineer` — services, APIs, infra (`backend-service-patterns`, `cloud-infra`)
    - `ux-designer` — design system, tokens, Figma authoring (`figma-design-system`, `figma-code-connect`, `design-theming`). **The Figma MCP is a remote OAuth server that a dispatched subagent may not reach.** ux-designer probes (`whoami`) and, if it can't write directly, returns a complete Figma build spec — the main session then executes the writes as its hands. Do not skip ux-designer or improvise the design yourself; it owns every design decision. Accept only a complete system (all components, breakpoints, states), never a token-only stub.
    - `frontend-engineer` — React + TanStack Start components, pages (`react-component-library`, `code-connect-impl`, `pages-templates`)

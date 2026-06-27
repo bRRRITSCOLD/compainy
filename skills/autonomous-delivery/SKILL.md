@@ -77,7 +77,7 @@ All three RUNAWAY knobs are parameterizable per run; omit any to keep its defaul
 
 ## Model & effort tiering
 
-Tier the dispatched model by **task cognitive load, not by agent identity** — task complexity varies within an agent, and pinning a model in agent frontmatter is too coarse (and would override the user's session choice). Agents stay `model: inherit`; pick the tier per dispatch via the Workflow `agent()` `model`/`effort` opts (or, in `/loop` mode, by which model the dispatching step uses).
+This is the concrete Scout → Build → Verify application of the **required Model selection rubric** in `project-management` → "Model selection (required at dispatch)" — read that for the general rule. Model is **always specified** per dispatch; an omitted model silently inherits the session's most expensive one. Tier by **task cognitive load, not agent identity** — complexity varies within an agent, and pinning a model in agent frontmatter is too coarse (and would override the user's session choice). Agents stay `model: inherit`; pick the tier per dispatch via the Workflow `agent()` `model`/`effort` opts (or, in `/loop` mode, by which model the dispatching step uses). The review gate omits `model` *deliberately* so it inherits the session's top model.
 
 | Stage | Model | Effort | Why |
 |---|---|---|---|
