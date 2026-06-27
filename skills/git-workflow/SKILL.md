@@ -46,11 +46,12 @@ These are not cosmetic. The `release.yml` CI workflow parses the squash-merge su
 |---|---|
 | `feat:` or `feat(…):` | minor |
 | `fix:`, `chore:`, `refactor:`, etc. | patch |
-| `BREAKING CHANGE:` in body, or `type!:` subject | major |
+| `type!:` subject (e.g. `feat!:`), or `BREAKING` in the subject | major |
 
 Rules:
 - Imperative mood: "add X", not "adds X" or "added X".
 - Subject ≤ ~72 characters.
+- The release workflow parses only the **squash-merge subject line** (the PR title). To signal a major bump, put `!` after the type in the PR title (`feat!: …`) or the word `BREAKING` in the title — a `BREAKING CHANGE:` footer in the body is **not** read by the current `release.yml`.
 - Every commit ends with the footer:
 
 ```
