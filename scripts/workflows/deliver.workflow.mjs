@@ -20,10 +20,15 @@ export const meta = {
   ],
 };
 
-// --- Tunables (adjust before running) ---
-const MAX_ITERATIONS = 20;       // hard cap on loop rounds
-const MAX_EMPTY_ROUNDS = 3;      // stop after this many rounds with no merged PRs
-const BUDGET_THRESHOLD = 5000;   // stop if remaining tokens fall below this (0 = skip check)
+// --- Tunables ---
+// Overridable per run via the Workflow tool's `args` global, e.g.
+//   Workflow({ name: 'deliver', args: { maxRounds: 30, budgetThreshold: 0 } })
+// Each falls back to its default when the arg is absent or non-numeric.
+// An explicit 0 is finite, so it is preserved — e.g. budgetThreshold: 0 disables the budget check.
+const toNum = (v, fallback) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
+const MAX_ITERATIONS   = toNum(args?.maxRounds, 20);       // hard cap on loop rounds
+const MAX_EMPTY_ROUNDS = toNum(args?.maxEmptyRounds, 3);   // stop after this many rounds with no merged PRs
+const BUDGET_THRESHOLD = toNum(args?.budgetThreshold, 5000); // stop if remaining tokens fall below this (0 = skip check)
 
 // Specialist agents by label (matches GitHub issue assignment conventions)
 const SPECIALIST_MAP = {

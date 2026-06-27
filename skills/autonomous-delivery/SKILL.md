@@ -48,9 +48,22 @@ The reference script can only see **declared `blockedBy` edges** — it cannot i
 |---|---|
 | **TERMINATION** | The dispatch loop drains ready issues until open issues = 0 (or a RUNAWAY/budget guard trips). It then runs a **Verify** step — `node scripts/ci/validate.mjs` plus the project's test suites. A red Verify is reported as a non-success outcome (flag + stop), never silently swallowed. The goal counts as *reached* only when open issues = 0 AND validate is green AND tests pass. |
 | **VERIFICATION** | Every PR passes through the staff-engineer review gate before merge. The reviewer is read-only and returns findings only — the **merge runs at the main-session/workflow level**, only after the gate approves. Never merge unreviewed. On non-approval: exactly one fix pass, then one re-review; if it still fails, flag the issue open and continue to the next. |
-| **RUNAWAY** | Hard max-iteration CAP (default 20 rounds). Also stop when `budget.remaining() < THRESHOLD` if running via the Workflow tool. (A consecutive-empty-rounds counter exists as a backstop, but because each issue is attempted at most once per run, the loop normally terminates first by exhausting *ready* issues — the CAP and budget are the load-bearing guards.) |
+| **RUNAWAY** | Hard max-iteration CAP (default **20** rounds). Also stop when `budget.remaining() < THRESHOLD` (default **5000**) if running via the Workflow tool. (A consecutive-empty-rounds counter — default **3** — exists as a backstop, but because each issue is attempted at most once per run, the loop normally terminates first by exhausting *ready* issues — the CAP and budget are the load-bearing guards.) All three are **user-overridable** — see "Tuning the guards" below. |
 | **DURABLE STATE** | GitHub issues + a progress ledger file (`.superpowers/delivery-progress.md`) are the resume map. They survive crash and context compaction. On resume, trust closed issues and `git log` over in-memory state — never reconstruct history from memory. |
 | **CONTEXT-ROT** | Run the `handoff` skill before ending any session with open issues. Prefer a fresh Claude Code session between phases or large work chunks — long sessions accumulate stale reasoning. |
+
+### Tuning the guards
+
+All three RUNAWAY knobs are parameterizable per run; omit any to keep its default:
+
+| Guard | Default | `/orchestrate` flag | Workflow `args` key |
+|---|---|---|---|
+| Max loop rounds (CAP) | 20 | `--rounds N` | `maxRounds` |
+| Consecutive empty rounds | 3 | `--empty-rounds N` | `maxEmptyRounds` |
+| Budget threshold (tokens) | 5000 | `--budget N` | `budgetThreshold` |
+
+- Via command: `/orchestrate <goal> --rounds 30 --budget 0` (`--budget 0` disables the budget check).
+- Via the Workflow tool directly: `args: { maxRounds: 30, maxEmptyRounds: 5, budgetThreshold: 0 }`. The reference script reads these from the `args` global and falls back to each default for any omitted key.
 
 ## Two execution modes
 
