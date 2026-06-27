@@ -151,3 +151,14 @@ for f in skills/*/SKILL.md; do
   [ "$declared" = "$dir" ] && echo "ok $f" || echo "MISMATCH $f: declared=$declared dir=$dir";
 done
 ```
+
+## CI / releases
+
+`validate.yml` runs `scripts/ci/validate.mjs` on every PR and push to `main` (skipped when the commit message contains `[skip ci]`).
+
+Merging to `main` triggers `release.yml`, which:
+- Reads the head commit subject to determine bump type: `BREAKING` or `type!:` → major; `feat` prefix → minor; everything else → patch.
+- Bumps `plugin.json` version via `scripts/ci/bump-version.mjs`, validates the plugin, commits as `chore(release): vX.Y.Z [skip ci]`, pushes to main.
+- Tags `vX.Y.Z` and cuts a GitHub Release with auto-generated notes.
+
+The bot commit carries `[skip ci]` to avoid a release loop. Do **not** manually edit the version in a PR — the release workflow owns it.

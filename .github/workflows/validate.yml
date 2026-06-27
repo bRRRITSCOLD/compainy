@@ -1,0 +1,30 @@
+name: validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[skip ci]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate plugin
+        run: node scripts/ci/validate.mjs
+
+      - name: Claude CLI validation (best-effort)
+        run: |
+          if command -v claude >/dev/null 2>&1; then
+            claude plugin validate .
+          else
+            echo "claude CLI not present — node validation is the gate"
+          fi
+        continue-on-error: true
