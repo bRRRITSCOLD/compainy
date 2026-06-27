@@ -12,7 +12,8 @@ A Claude Code plugin that gives you a complete feature-delivery team:
 - **devops-engineer** — owns the platform and developer experience: IaC provisioning (AWS, Cloudflare, Hetzner), CI/CD pipelines and release automation, the local dev loop (docker-compose, task runner, seeds), containers, and observability.
 - **systems-architect** — designs system topology, defines service and bounded-context boundaries, authors ADRs, evaluates non-functional requirements, and selects technology with explicit tradeoffs.
 - **data-architect** — chooses stores per workload with explicit tradeoffs, designs schemas and indexes, models data for vector/semantic search and RAG pipelines, and aligns persistence schemas with DDD aggregate boundaries.
-- **staff-engineer** — reviews code from the six implementation agents (`ux-designer`, `frontend-engineer`, `backend-engineer`, `devops-engineer`, `systems-architect`, `data-architect`) against the team's principle skills plus correctness, security, and performance; does not write code.
+- **security-architect** — owns the security posture: threat models (STRIDE, trust boundaries), authentication/authorization design, secrets and key management, data protection, and supply-chain controls; runs the deep adversarial security audit on sensitive changes.
+- **staff-engineer** — reviews code from the seven implementation agents (`ux-designer`, `frontend-engineer`, `backend-engineer`, `devops-engineer`, `systems-architect`, `data-architect`, `security-architect`) against the team's principle skills plus correctness, security, and performance; does not write code.
 - **project-manager** — turns a goal or epic into a sequenced plan of GitHub issues with specialist-agent assignments and dependency tracking; does not dispatch agents (the main session does that).
 
 Shared principle skills — TDD, DDD, pragmatic SOLID, DRY/KISS — are the single source of truth for how every agent reasons and works.
@@ -56,10 +57,11 @@ Read tools used by the frontend-engineer work at any seat level.
 | `devops-engineer` | Owns platform & DevEx: IaC provisioning, CI/CD & release automation, local dev loop, containers, observability | `cloud-infra` (shared), `devex`, `ci-cd` |
 | `systems-architect` | Designs system topology, defines service/bounded-context boundaries, writes ADRs, evaluates NFRs, selects technology with tradeoffs | `architecture` |
 | `data-architect` | Chooses stores per workload, models schemas, designs for vector/semantic search and RAG, aligns persistence with DDD aggregate boundaries | `data-modeling` |
+| `security-architect` | Threat models, designs auth/secrets/data-protection + supply-chain controls, runs the deep security audit on sensitive changes | `threat-modeling`, `security-review` |
 | `staff-engineer` | Reviews all engineer output for principle compliance, correctness, security, and performance | `code-review` (read-only toolset) |
 | `project-manager` | Plans and tracks epics as GitHub issues; assigns specialist agents; maps dependencies and critical path; does not dispatch agents | `project-management` |
 
-The five engineering and architecture agents — `frontend-engineer`, `backend-engineer`, `staff-engineer`, `systems-architect`, and `data-architect` — carry all four shared principle skills: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss`. The `devops-engineer` carries three of the four — `principles-tdd`, `principles-pragmatic-solid`, `principles-dry-kiss` — but not `principles-ddd` (it does no domain modeling). The `ux-designer` and `project-manager` carry only `principles-dry-kiss`: `ux-designer` for design-token discipline, `project-manager` to keep the delivery process lean (KISS/YAGNI).
+The five engineering and architecture agents — `frontend-engineer`, `backend-engineer`, `staff-engineer`, `systems-architect`, and `data-architect` — carry all four shared principle skills: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss`. The `devops-engineer` carries three of the four — `principles-tdd`, `principles-pragmatic-solid`, `principles-dry-kiss` — but not `principles-ddd` (it does no domain modeling). The `ux-designer`, `project-manager`, and `security-architect` carry only `principles-dry-kiss`: `ux-designer` for design-token discipline, `project-manager` to keep the delivery process lean, and `security-architect` to keep controls proportionate to the ranked threat (KISS/YAGNI) — it also draws on `test-design` for abuse-case tests.
 
 ## Principles
 

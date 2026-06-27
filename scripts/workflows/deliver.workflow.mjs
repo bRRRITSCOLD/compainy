@@ -58,6 +58,7 @@ const SPECIALIST_MAP = {
   'ux-designer':        'ux-designer',
   'systems-architect':  'systems-architect',
   'data-architect':     'data-architect',
+  'security-architect': 'security-architect',
 };
 
 // --- Phase 1: Scout — discover open issues and their dependencies ---
