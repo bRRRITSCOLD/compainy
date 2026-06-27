@@ -55,7 +55,7 @@ Skip for features with no persistence layer, or where the existing schema is unc
 
 ### Phase 4 — Build loop
 
-Execute the `project-management` dispatch loop (one issue = one PR off main):
+Execute the `project-management` dispatch loop — follow the `git-workflow` skill for PR sizing (small cohesive PRs, default per-issue, group trivial siblings, split big ones; squash-merge off main):
 
 For each ready issue (wave order, blockers closed):
 
@@ -154,5 +154,6 @@ All issues closed. Branches deleted. `docs/superpowers/specs/logging-platform.md
 - `data-modeling` — Phase 3 store selection, schema, retention tiers
 - `superpowers:subagent-driven-development` — per-task implement → review cycle in Phase 4
 - `superpowers:finishing-a-development-branch` — Phase 5 cleanup
+- `git-workflow` — branching, commit conventions, PR sizing, release automation
 - `handoff` — cross-phase session continuity
 - `principles-dry-kiss` — KISS/YAGNI governs which phases to skip and how much process to apply

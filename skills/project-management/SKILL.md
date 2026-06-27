@@ -71,7 +71,7 @@ For each ready task (status = todo, all blockers closed):
 
 1. **Implement** — invoke the assigned specialist agent via `superpowers:subagent-driven-development`. Brief the agent with: issue number, goal, done criteria, relevant file paths, and any constraints from prior tasks.
 2. **Review** — invoke `staff-engineer` on the resulting diff.
-3. **Merge** — one issue = one PR; squash-merge off main.
+3. **Merge** — follow the `git-workflow` skill: small cohesive PRs, default per-issue, group trivial siblings, split big ones. Squash-merge off main.
 4. **Update tracking** — mark the issue closed; update the local task list; check whether closing this issue unblocks the next wave.
 5. **Repeat** — pick the next ready task.
 
@@ -97,5 +97,6 @@ Before ending any session that has open issues, run the `handoff` skill. Record:
 ## Cross-references
 
 - `superpowers:subagent-driven-development` — per-task implement → review cycle used in the dispatch loop
+- `git-workflow` — branching, commit conventions, PR sizing, and merge rules
 - `handoff` — session continuity between work chunks
 - `principles-dry-kiss` — KISS/YAGNI keeps the process lean; do not add coordination overhead that the task doesn't need

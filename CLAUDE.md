@@ -41,6 +41,7 @@ skills/
   handoff/                 # session handoff — write before ending a work chunk
   project-management/      # orchestration playbook for the main session: decompose, track, dispatch
   feature-delivery/        # end-to-end delivery phases: frame → plan → architecture → data → build → finish
+  git-workflow/            # branching, Conventional Commits, PR sizing, squash-merge, release automation
 
 commands/
   deliver.md               # /deliver <goal> — front door for feature-delivery skill
@@ -191,3 +192,5 @@ Merging to `main` triggers `release.yml`, which:
 - Tags `vX.Y.Z` and cuts a GitHub Release with auto-generated notes.
 
 The bot commit carries `[skip ci]` to avoid a release loop. Do **not** manually edit the version in a PR — the release workflow owns it.
+
+For full branching, commit, and PR conventions see the `git-workflow` skill.
