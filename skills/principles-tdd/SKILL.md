@@ -192,5 +192,6 @@ func (s *OrderServiceSuite) TestOrderService_CreateOrder_PersistsAndReturnsID() 
 ## Cross-references
 
 - `superpowers:test-driven-development` — deep-dive skill for complex TDD scenarios, cycle examples, and anti-patterns.
+- `test-design` — designs *what* to test (acceptance criteria + adversarial case enumeration + coverage-gap audit) that seeds the failing tests this skill's red/green rhythm then drives. This skill owns the rhythm/tiers/naming; `test-design` owns case design.
 - `principles-pragmatic-solid` — interface/dependency-inversion rules that keep test doubles effortless.
 - `principles-dry-kiss` — refactor phase guidance (don't over-abstract the resulting code).

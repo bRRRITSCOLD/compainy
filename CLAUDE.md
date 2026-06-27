@@ -40,6 +40,7 @@ skills/
   ci-cd/                   # CI/CD pipelines, build/test gates, release automation
   architecture/            # C4 diagrams, ADRs, NFRs, tech selection, evolutionary arch
   data-modeling/           # store selection, schema design, indexing, migrations, vector/RAG data design
+  test-design/             # acceptance criteria + adversarial case enumeration + coverage-gap audit
   code-review/             # structured review checklist used by staff-engineer
   handoff/                 # session handoff — write before ending a work chunk
   project-management/      # orchestration playbook for the main session: decompose, track, dispatch

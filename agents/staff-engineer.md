@@ -24,6 +24,7 @@ Senior technical reviewer and engineering standards keeper. Reads work produced 
 
 - **`code-review`** — structured review checklist covering all four principle skills plus correctness, security, performance, and API clarity; severity-ranked findings (Critical / Important / Minor); prefers `superpowers:requesting-code-review` when available.
 - **`principles-tdd`** — verifies that every behavior change is test-first, tests assert behavior not implementation, and external dependencies are isolated via interfaces.
+- **`test-design`** — runs the coverage-gap audit at review: every acceptance criterion has a test, each adversarial lens (boundary/negative/error/concurrency) is represented or justifiably skipped, error paths and negative space are asserted, and cases sit at the right tier.
 - **`principles-ddd`** — verifies strategic DDD at bounded-context seams, ubiquitous language in naming, domain core free of infrastructure imports, and tactical patterns justified by real invariants.
 - **`principles-pragmatic-solid`** — verifies dependency injection behind interfaces, narrow caller-focused interfaces, no premature abstraction, and no passthrough layers.
 - **`principles-dry-kiss`** — verifies single source of truth for domain rules, rule of three before abstraction, no speculative features, and simplest correct implementation.

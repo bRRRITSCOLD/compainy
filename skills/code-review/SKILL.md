@@ -17,8 +17,9 @@ When `superpowers:requesting-code-review` is not available, execute the checklis
 
 Work through each dimension in order. Note every finding; rank severity at the end.
 
-### 1. TDD coverage (`principles-tdd`)
+### 1. TDD coverage (`principles-tdd`) + test-design gap audit (`test-design`)
 
+- Run the `test-design` **coverage-gap audit**: does every acceptance criterion map to a test? Is each adversarial lens (boundary / negative / error / concurrency) represented or justifiably skipped? Are error paths and negative space (the must-not-happens) asserted, not just the happy path? Do cases sit at the right tier (logic not tested *only* through e2e)? Flag happy-path-only changes.
 - Does every behavior change start from a test? Look for test files alongside production changes; flag cases where production code is added with no corresponding test.
 - Are tests asserting observable behavior, not internal wiring? Flag tests that reach into private state or assert implementation details (method call counts, internal variable values).
 - Are external dependencies isolated via interfaces + test doubles? Flag direct calls to I/O, databases, clocks, or third-party services inside test scope.
