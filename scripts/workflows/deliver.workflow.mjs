@@ -166,11 +166,19 @@ if (scoutResult.error) {
     iterations++;
     log(`--- Round ${iterations} / ${MAX_ITERATIONS} (${openIssues.length} open) ---`);
 
-    // Find issues whose blockers are all closed (closed by us or already closed before the run)
+    // Find issues whose blockers are all closed: closed by us this run, OR not in
+    // the current open set. Scout returns only OPEN issues, so a blockedBy dep that
+    // is absent from openIssues is already closed (e.g. in a PRIOR session) — that
+    // second clause is what un-strands "blockedBy a prior-closed issue". Without it,
+    // `closedThisRun` only knows this-run closures, so such an issue is never ready
+    // and the loop falsely reports "blocker detected, none ready" and stops.
+    // (Reproduced + fix verified in a sandbox run: #4 blockedBy a pre-closed issue
+    // stalled before this change, builds and merges after it.)
+    const openNumbers = new Set(openIssues.map((i) => i.number));
     const ready = openIssues.filter(
       (issue) =>
         !seen.has(issue.number) &&
-        issue.blockedBy.every((dep) => closedThisRun.has(dep)),
+        issue.blockedBy.every((dep) => closedThisRun.has(dep) || !openNumbers.has(dep)),
     );
 
     if (ready.length === 0) {
