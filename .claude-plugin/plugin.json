@@ -1,13 +1,13 @@
 {
-  "name": "ai",
+  "name": "compainy",
   "version": "0.15.3",
   "description": "Personal AI dev team: ten specialist agents (UX, frontend, backend, devops, systems/data/security architects, lead engineer, staff engineer, project manager) plus the shared TDD/DDD/pragmatic-SOLID/DRY-KISS skills they operate by. Requires the superpowers and figma companion plugins.",
   "author": {
     "name": "Blaine Richardson",
     "email": "blainerrichardson@gmail.com"
   },
-  "homepage": "https://github.com/bRRRITSCOLD/ai",
-  "repository": "https://github.com/bRRRITSCOLD/ai",
+  "homepage": "https://github.com/bRRRITSCOLD/compainy",
+  "repository": "https://github.com/bRRRITSCOLD/compainy",
   "license": "MIT",
   "keywords": [
     "agents",

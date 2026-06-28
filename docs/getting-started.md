@@ -1,6 +1,6 @@
 # Getting started
 
-How to drive a project end-to-end with the `ai` plugin — from an empty repo to a shipped, reviewed build — while keeping each session's context clean and the autonomous loop's cost bounded.
+How to drive a project end-to-end with the `compainy` plugin — from an empty repo to a shipped, reviewed build — while keeping each session's context clean and the autonomous loop's cost bounded.
 
 The one idea to hold onto: **plan the whole goal once, then deliver one epic per session.** A long autonomous run on a whole product bloats context, burns tokens, and accumulates stale reasoning. A goal broken into epics, with one epic driven to done per fresh session, stays sharp and cheap — and the GitHub issues + progress ledger carry state across the session boundaries.
 
@@ -25,7 +25,7 @@ The one idea to hold onto: **plan the whole goal once, then deliver one epic per
 
 ## Prerequisites
 
-1. Install the plugin and its companions (the `ai` marketplace lists them): the `ai` plugin, `superpowers`, and the `figma` companion.
+1. Install the plugin and its companions (the `compainy` marketplace lists them): the `compainy` plugin, `superpowers`, and the `figma` companion.
 2. If the project has UI, **authenticate the Figma MCP** in the session before the design phase (needs a Figma Full seat to write). Without it, `ux-designer` falls back to handing a build spec up to the main session.
 3. Be in a git repo with a GitHub remote and `gh` authenticated (the loop creates issues/PRs and merges).
 4. **One orchestration per repo at a time.** Never run two `/deliver` or `/orchestrate` sessions against the same repo — they double-dispatch and collide.
@@ -35,14 +35,14 @@ The one idea to hold onto: **plan the whole goal once, then deliver one epic per
 The plugin is opinionated by default: TanStack Start + shadcn/ui on Base UI, Go/Node/Rust, AWS/Cloudflare/Hetzner. If your project uses a different stack, run:
 
 ```
-/ai:init-stack
+/compainy:init-stack
 ```
 
 It interviews you and writes `.ai/stack-profile.md`; the implementation skills read it and adapt (researching the chosen tech first). If you're on the defaults, skip this — the defaults Just Work. Engineering discipline (TDD/DDD/SOLID/DRY, ports-and-adapters, test tiers, naming) is the same either way.
 
 ## Step 2 — Kick off the goal with `/deliver`
 
-Run `/ai:deliver "<goal>"` once. It sequences the team across the upfront phases:
+Run `/compainy:deliver "<goal>"` once. It sequences the team across the upfront phases:
 
 - **Frame** (brainstorming) — pin the real requirement and done-criteria.
 - **Architecture** (`systems-architect`) — topology, ADRs, NFRs; it **delegates the security posture to `security-architect`** (threat model — STRIDE, trust boundaries — for anything with auth, money, PII, or multi-tenant data) and **store choice to `data-architect`**.
@@ -65,7 +65,7 @@ For each remaining epic, start a **fresh session** (small context = sharp Claude
 1. Read the handoff + `.superpowers/delivery-progress.md` ledger + `gh issue list` — trust those over memory.
 2. Drive just that epic's issues to done with the autonomous loop, **with guards**:
    ```
-   /ai:orchestrate "<epic name or #issue numbers> --rounds 12 --budget 400000"
+   /compainy:orchestrate "<epic name or #issue numbers> --rounds 12 --budget 400000"
    ```
    The loop runs dispatch → `staff-engineer` review gate → squash-merge until the epic's issues are closed or a guard trips. It's **serial by default** (safe); only add `args.parallel: true` via the Workflow tool once the epic's issues are genuinely file-disjoint.
 3. When the epic is done (or a guard trips), run `handoff` and start a new session for the next epic.
@@ -115,17 +115,17 @@ Subagents can't spawn subagents — all dispatch happens at the main session, ne
 Paste this in the **kickoff session** (adapt the goal/stack/links). It frames + plans + architects the whole goal, then builds only the first slice.
 
 ```
-Build <PRODUCT> in THIS repo. You have the `ai` plugin (10 agents: ux-designer,
+Build <PRODUCT> in THIS repo. You have the `compainy` plugin (10 agents: ux-designer,
 frontend-engineer, backend-engineer, devops-engineer, systems-architect,
 data-architect, security-architect, lead-engineer, staff-engineer, project-manager) + superpowers
 + the figma companion. Full permission to auto-approve tools, gh, branches, PRs,
 squash-merges. One orchestration in this repo only.
 
-0. STACK: if the stack differs from the plugin defaults, run /ai:init-stack first
+0. STACK: if the stack differs from the plugin defaults, run /compainy:init-stack first
    and write .ai/stack-profile.md. [e.g. "uses floci for AWS-local, NOT localstack;
    docker-compose for mongodb/postgres/redis/rabbitmq"]
 
-1. KICKOFF: run /ai:deliver to frame the goal and decide the architecture first —
+1. KICKOFF: run /compainy:deliver to frame the goal and decide the architecture first —
    pull in security-architect to threat-model (multi-tenant isolation / auth / PII)
    and data-architect for the data model. THEN have lead-engineer turn that design
    into the implementation plan, and only then project-manager transcribe the plan
@@ -162,7 +162,7 @@ orchestration in this repo only.
    .superpowers/delivery-progress.md, `gh issue list`, and `git log`. Report status.
 
 2. Drive EPIC "<epic name>" (issues #<list>) to done:
-   /ai:orchestrate "#<list> --rounds 12 --budget 400000"
+   /compainy:orchestrate "#<list> --rounds 12 --budget 400000"
    Serial dispatch. Every PR through the staff-engineer review gate; if a sensitive
    issue touches auth/secrets/tenancy, run the security-review audit too.
 

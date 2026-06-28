@@ -112,7 +112,7 @@ Do **not** hand-edit `plugin.json` version. On merge to `main`, `release.yml`:
 2. Bumps `plugin.json` via `scripts/ci/bump-version.mjs`.
 3. Commits as `chore(release): vX.Y.Z [skip ci]`, tags `vX.Y.Z`, cuts a GitHub Release.
 
-Consumers update via `/plugin marketplace update ai` → `/plugin update ai@ai` → `/reload-plugins`.
+Consumers update via `/plugin marketplace update compainy` → `/plugin update compainy@compainy` → `/reload-plugins`.
 
 ## Cross-references
 

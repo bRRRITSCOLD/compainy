@@ -50,9 +50,9 @@ const market = readJSON('.claude-plugin/marketplace.json');
 if (market) {
   ok('.claude-plugin/marketplace.json parses');
   const entry = Array.isArray(market.plugins) &&
-    market.plugins.find(p => p.name === 'ai' && p.source === './');
-  if (entry) ok('marketplace.json plugins[] has ai entry with source "./"');
-  else fail('marketplace.json plugins[] missing entry {name:"ai", source:"./"}');
+    market.plugins.find(p => p.name === 'compainy' && p.source === './');
+  if (entry) ok('marketplace.json plugins[] has compainy entry with source "./"');
+  else fail('marketplace.json plugins[] missing entry {name:"compainy", source:"./"}');
 }
 
 const hooks = readJSON('hooks/hooks.json');

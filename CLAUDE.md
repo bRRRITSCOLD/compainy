@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides ten specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
+This is a **Claude Code plugin** — the `compainy` plugin from the `bRRRITSCOLD/compainy` marketplace entry. It provides ten specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
 
 ### Layout
 

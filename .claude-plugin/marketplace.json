@@ -1,18 +1,18 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "ai",
+  "name": "compainy",
   "description": "Blaine Richardson's personal AI dev-team plugin, plus the superpowers and figma companions it relies on.",
   "owner": { "name": "Blaine Richardson", "url": "https://github.com/bRRRITSCOLD" },
   "plugins": [
     {
-      "name": "ai",
+      "name": "compainy",
       "description": "Personal AI dev team: ten specialist agents (UX, frontend, backend, devops, architects, lead/staff engineers, PM) + shared engineering-principle skills.",
       "source": "./",
       "category": "productivity"
     },
     {
       "name": "superpowers",
-      "description": "Required companion: core skills library (brainstorming, writing-plans, TDD, code review) the ai agents build on.",
+      "description": "Required companion: core skills library (brainstorming, writing-plans, TDD, code review) the compainy agents build on.",
       "source": { "source": "github", "repo": "obra/superpowers" },
       "category": "productivity"
     },

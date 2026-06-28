@@ -51,7 +51,7 @@ So divergence is detectable, these are the skills' defaults. Rows marked **invar
 
 ```markdown
 # Project Stack Profile
-<!-- Read by the `ai` plugin implementation skills; overrides their defaults.
+<!-- Read by the `compainy` plugin implementation skills; overrides their defaults.
      Discipline (TDD/DDD/pragmatic-SOLID/DRY-KISS, ports-and-adapters,
      test tiers, Subject_Scenario_Expectation naming) is invariant. -->
 

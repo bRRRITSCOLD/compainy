@@ -1,4 +1,4 @@
-# ai
+# compainy
 
 Personal AI dev-team plugin for Claude Code. Ten specialist agents — UX designer, frontend engineer, backend engineer, devops engineer, systems architect, data architect, security architect, lead engineer, staff engineer, and project manager — plus a shared library of engineering-principle skills they all operate by.
 
@@ -21,7 +21,7 @@ Shared principle skills — TDD, DDD, pragmatic SOLID, DRY/KISS — are the sing
 
 ## Requirements
 
-**The `superpowers` and `figma` companion plugins are required.** They are installed alongside `ai` from the same marketplace entry; see Install below.
+**The `superpowers` and `figma` companion plugins are required.** They are installed alongside `compainy` from the same marketplace entry; see Install below.
 
 - **superpowers** — core skills library (`brainstorming`, `writing-plans`, TDD, code-review) that the ai agents build on.
 - **figma** — official Figma MCP remote server. Provides write-to-canvas tools (`use_figma`, `create_new_file`, `generate_figma_design`, `upload_assets`) for the ux-designer and read tools (`get_design_context`, `get_variable_defs`, `get_code_connect_map`) for the frontend-engineer.
@@ -29,12 +29,12 @@ Shared principle skills — TDD, DDD, pragmatic SOLID, DRY/KISS — are the sing
 ## Install
 
 ```
-/plugin marketplace add bRRRITSCOLD/ai
+/plugin marketplace add bRRRITSCOLD/compainy
 ```
 
 This opens the marketplace entry. Install all three plugins from the same menu:
 
-1. **ai** — the dev-team agents and principle skills.
+1. **compainy** — the dev-team agents and principle skills.
 2. **superpowers** — required companion (from `obra/superpowers`).
 3. **figma** — required companion (official Figma MCP remote server).
 
