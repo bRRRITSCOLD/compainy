@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(echo \"exit:$?\")"
+      "Bash(echo \"exit:$?\")",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(gh issue create --title 'feat: stack-profile mechanism — opinionated defaults, overridable per project via /init-stack' --body ' *)",
+      "Bash(git worktree *)"
     ]
   }
 }
