@@ -5,7 +5,7 @@ description: End-to-end feature delivery orchestration for the main Claude sessi
 
 # Feature Delivery Skill
 
-Full-stack delivery playbook for the main Claude Code session. Sequences the specialist agents — brainstorm → plan → architecture → data → build → finish — scaling the process to the real size of the goal. Small goals skip phases; large goals run them all.
+Full-stack delivery playbook for the main Claude Code session. Sequences the specialist agents — brainstorm → architecture → data → plan the build → decompose & track → build → finish — scaling the process to the real size of the goal. Small goals skip phases; large goals run them all. Note the order: the design is decided first, the `lead-engineer` turns it into a technical implementation plan, and only then does the `project-manager` break that plan into issues — the breakdown follows the technical plan, never precedes it.
 
 Apply `principles-dry-kiss`: phases are tools, not ceremony. Do only the phases that the goal actually needs.
 
@@ -21,17 +21,7 @@ Invoke `superpowers:brainstorming` to turn the raw goal into a concrete spec. Ou
 
 Skip if the goal is already fully specified with acceptance criteria.
 
-### Phase 1 — Plan & track
-
-Invoke the `project-manager` agent (via the `project-management` skill) to:
-- Clarify done criteria
-- Decompose the spec into independently shippable tasks
-- Create a GitHub issue per task with agent assignments, acceptance criteria, and `blockedBy` links
-- Produce a sequenced delivery roadmap (wave 0, wave 1, …)
-
-Output: a GitHub issue list + local tracking doc. This becomes the execution contract for Phase 4.
-
-### Phase 2 — Architecture
+### Phase 1 — Architecture
 
 Invoke the `systems-architect` agent (via the `architecture` skill) to:
 - Define service and bounded-context boundaries
@@ -40,9 +30,9 @@ Invoke the `systems-architect` agent (via the `architecture` skill) to:
 - Select technology with explicit tradeoff tables
 - Write ADRs for every significant decision at `docs/adr/NNNN-title.md`
 
-Skip for self-contained utilities where one process/service is the obvious answer. Do not produce ADRs for decisions that are not load-bearing.
+For anything handling auth, money, PII, multi-tenant data, or untrusted input, pull in `security-architect` here to threat-model (`threat-modeling`) so security requirements seed the plan. Skip for self-contained utilities where one process/service is the obvious answer. Do not produce ADRs for decisions that are not load-bearing.
 
-### Phase 3 — Data
+### Phase 2 — Data
 
 Invoke the `data-architect` agent (via the `data-modeling` skill) to:
 - Choose stores per workload (relational, columnar, document, key-value, vector, time-series)
@@ -53,7 +43,23 @@ Invoke the `data-architect` agent (via the `data-modeling` skill) to:
 
 Skip for features with no persistence layer, or where the existing schema is unchanged.
 
-### Phase 4 — Build loop
+### Phase 3 — Plan the build
+
+Invoke the `lead-engineer` agent (via `superpowers:writing-plans`) to turn the decided design + data model + threat model into one coherent implementation plan: an ordered, dependency-aware sequence of small, revertible, PR-sized tasks, each with its file-level approach, integration points, and the test cases (from `test-design`) it must satisfy. This is the **technical** plan — build order, integration seams, file contention — authored by the agent with the depth to make those calls.
+
+Output: an implementation plan at `docs/superpowers/plans/<feature-name>.md`. This is the input Phase 4 decomposes into issues. Skip only for a trivial single-task change where the order is obvious.
+
+### Phase 4 — Decompose & track
+
+Invoke the `project-manager` agent (via the `project-management` skill) to turn the lead-engineer's implementation plan into the tracked execution contract:
+- Clarify done criteria
+- Break the plan into independently shippable tasks (epics → issues)
+- Create a GitHub issue per task with specialist-agent assignments, acceptance criteria, and `blockedBy` links
+- Produce a sequenced delivery roadmap (wave 0, wave 1, …)
+
+The PM does the **work breakdown** of the technical plan — it does not author the technical sequencing itself. Output: a GitHub issue list + local tracking doc. This becomes the execution contract for Phase 5.
+
+### Phase 5 — Build loop
 
 **Before dispatching any specialist, seed the stack profile.** If the project's stack differs from the plugin defaults (TanStack Start, Go/Node/Rust, AWS/CF/Hetzner, shadcn/Base UI), run `/init-stack` (or write `.ai/stack-profile.md` directly per the `stack-profile` skill) so every dispatched specialist reads the same stack. A default-stack project can skip this. Discipline (TDD/DDD/pragmatic-SOLID/DRY-KISS, ports-and-adapters, test tiers, naming) is invariant either way.
 
@@ -72,9 +78,11 @@ For each ready issue (wave order, blockers closed):
 4. **Update tracking** — mark closed; check what the next wave unlocks.
 5. **Repeat** — pick the next ready task.
 
+When an implementer escalates a cross-cutting technical decision (a shared interface, an integration contract, a migration order) or gets stuck on an ambiguous spec, send it to `lead-engineer` to make the call and amend the plan — then re-dispatch. Don't let each implementer diverge on a shared decision.
+
 Not every build needs all three specialists. A backend-only feature skips `ux-designer` and `frontend-engineer`. A UI-only feature with no new APIs skips `backend-engineer`. Scale to what the issue actually requires.
 
-### Phase 5 — Finish
+### Phase 6 — Finish
 
 Invoke `superpowers:finishing-a-development-branch` to:
 - Ensure all issues are closed and PRs merged
@@ -88,7 +96,7 @@ CI auto-versions on merge to main — do not manually bump `plugin.json`.
 - **Principle skills auto-apply throughout**: `principles-tdd`, `principles-ddd`, `principles-pragmatic-solid`, `principles-dry-kiss` are active in every specialist agent session without explicit invocation.
 - **Run `handoff` between work chunks** — before ending any session with open issues, capture state so the next session can resume instantly.
 - **Prefer a fresh session per phase** — long sessions accumulate stale context. Clean phase boundaries map cleanly to session boundaries.
-- **Phases are skippable** — a one-file utility skips Phases 2 and 3. A proof-of-concept skips Phase 4's UX lane entirely. Scale the process to the goal.
+- **Phases are skippable** — a one-file utility skips Phases 1–3 (no architecture, no data model, no separate plan). A proof-of-concept skips Phase 5's UX lane entirely. Scale the process to the goal.
 
 ## Worked example — logging platform
 
@@ -102,25 +110,7 @@ Goal: Build an observability logging platform — ingest → queue → process �
 - **In scope**: HTTP ingest, structured log storage, log explorer UI, alert rules.
 - **Out of scope**: distributed tracing, metrics, synthetic monitoring.
 
-### Phase 1 output (issues)
-
-Wave 0 (parallelizable):
-- `#1 systems-architect: C4 diagram + ADRs for ingest/queue/store tech selection`
-- `#2 data-architect: columnar store schema + hot/warm/cold retention plan`
-
-Wave 1 (after #1, #2):
-- `#3 backend-engineer: Go+Gin ingestion service (HTTP → queue)`
-- `#4 backend-engineer: log processor (queue → columnar store)`
-
-Wave 2 (after #3, #4):
-- `#5 backend-engineer: query API (full-text + time-range + label filters)`
-- `#6 ux-designer: log explorer design system + tokens in Figma`
-
-Wave 3 (after #5, #6):
-- `#7 frontend-engineer: TanStack Start log explorer — live tail + nuqs URL state + tanstack-form alert rules`
-- `#8 backend-engineer: alert rules engine + notification dispatch`
-
-### Phase 2 output (architecture)
+### Phase 1 output (architecture)
 
 C4 container diagram: browser → TanStack Start frontend → query API → columnar store; HTTP ingestor → Kafka/NATS queue → processor → columnar store.
 
@@ -129,7 +119,7 @@ ADRs:
 - `docs/adr/0002-nats-jetstream-queue.md` — NATS JetStream over Kafka: lower ops overhead for target ingest rate; swap path documented if load exceeds 1 M/s.
 - `docs/adr/0003-go-gin-ingestion.md` — Go+Gin for ingest: throughput requirement (500 k/s), team familiarity.
 
-### Phase 3 output (data)
+### Phase 2 output (data)
 
 - **Hot tier**: ClickHouse on SSD, 7-day retention, all columns indexed.
 - **Warm tier**: ClickHouse + S3-backed cold storage, 30-day window, compressed.
@@ -137,27 +127,56 @@ ADRs:
 - Schema: `logs(ts DateTime64, service String, level Enum, message String, labels Map(String,String))` — partitioned by day, ordered by `(service, ts)`.
 - Vector embeddings table for semantic search: `log_embeddings(log_id UUID, embedding Array(Float32))` — `pgvector` sidecar if semantic search is enabled.
 
-### Phase 4 output (PRs)
+### Phase 3 output (implementation plan)
 
+`docs/superpowers/plans/logging-platform.md` (authored by `lead-engineer`) — the design above sequenced into a build order with the integration seams called out:
+- **Foundations first**: the NATS subject + the ClickHouse `logs` schema are the shared contracts the ingestor, processor, and query API all bind to — land them before any service that depends on them.
+- **Critical path**: ingestor → processor → query API → explorer UI (each needs the prior's output to test against). Alerting branches off the processor and is parallel-safe with the query API.
+- **Parallel-safe & file-disjoint**: the design-system work (Figma + tokens) shares no files with the backend and runs alongside the whole backend critical path.
+- Per task: the public interface, the test cases from `test-design` (e.g. ingestor — *Ingest_MalformedPayload_Returns422*, *Ingest_QueueDown_BuffersAndRetries*), and a PR-sized boundary.
+
+### Phase 4 output (issues)
+
+The `project-manager` breaks the plan above into tracked issues + waves (it does not re-derive the order — it transcribes the lead-engineer's sequencing into dependencies):
+
+Wave 0 (foundations, parallelizable):
+- `#1 backend-engineer: NATS subjects + ClickHouse logs schema (shared contracts)`
+- `#2 ux-designer: log explorer design system + tokens in Figma`
+
+Wave 1 (after #1):
+- `#3 backend-engineer: Go+Gin ingestion service (HTTP → queue)`
+- `#4 backend-engineer: log processor (queue → columnar store)`
+
+Wave 2 (after #3, #4):
+- `#5 backend-engineer: query API (full-text + time-range + label filters)`
+- `#6 backend-engineer: alert rules engine + notification dispatch (parallel-safe with #5)`
+
+Wave 3 (after #5, #2):
+- `#7 frontend-engineer: TanStack Start log explorer — live tail + nuqs URL state + tanstack-form alert rules`
+
+### Phase 5 output (PRs)
+
+- PR #1: Shared contracts — NATS subjects + ClickHouse `logs` schema migration (the foundations everything binds to).
+- PR #2: Figma design system — log explorer tokens, `LogRow`, `LiveTail`, `AlertRuleForm` components, Code Connect wired.
 - PR #3: Go+Gin ingestor — `/ingest` endpoint, NATS JetStream publish, Zod-validated payload schema, unit + integration tests.
 - PR #4: Log processor — NATS consumer → ClickHouse batch insert, retry/backoff, health metrics.
 - PR #5: Query API — full-text search, time-range, label filters, cursor pagination.
-- PR #6: Figma design system — log explorer tokens, `LogRow`, `LiveTail`, `AlertRuleForm` components, Code Connect wired.
+- PR #6: Alert rules engine — rule evaluation loop, Slack/PagerDuty notification dispatch.
 - PR #7: TanStack Start log explorer — live tail via SSE, nuqs for URL-driven filter state, tanstack-form for alert rule authoring.
-- PR #8: Alert rules engine — rule evaluation loop, Slack/PagerDuty notification dispatch.
 
-### Phase 5 output
+### Phase 6 output
 
 All issues closed. Branches deleted. `docs/superpowers/specs/logging-platform.md` annotated with final ADR links and deferred items (distributed tracing — YAGNI for now).
 
 ## Cross-references
 
 - `superpowers:brainstorming` — Phase 0 spec
-- `project-management` — Phase 1 decomposition, issue tracking, dispatch loop
-- `architecture` — Phase 2 topology, ADRs, NFRs, tech selection
-- `data-modeling` — Phase 3 store selection, schema, retention tiers
-- `superpowers:subagent-driven-development` — per-task implement → review cycle in Phase 4
-- `superpowers:finishing-a-development-branch` — Phase 5 cleanup
+- `architecture` — Phase 1 topology, ADRs, NFRs, tech selection
+- `data-modeling` — Phase 2 store selection, schema, retention tiers
+- `superpowers:writing-plans` — Phase 3 implementation plan (authored by `lead-engineer`)
+- `project-management` — Phase 4 decomposition, issue tracking, dispatch loop
+- `superpowers:subagent-driven-development` — per-task implement → review cycle in Phase 5
+- `superpowers:finishing-a-development-branch` — Phase 6 cleanup
 - `git-workflow` — branching, commit conventions, PR sizing, release automation
 - `handoff` — cross-phase session continuity
 - `principles-dry-kiss` — KISS/YAGNI governs which phases to skip and how much process to apply

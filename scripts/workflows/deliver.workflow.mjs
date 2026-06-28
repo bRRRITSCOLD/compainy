@@ -52,6 +52,7 @@ const MODEL = {
 
 // Specialist agents by label (matches GitHub issue assignment conventions)
 const SPECIALIST_MAP = {
+  'lead-engineer':      'lead-engineer',
   'backend-engineer':   'backend-engineer',
   'frontend-engineer':  'frontend-engineer',
   'devops-engineer':    'devops-engineer',

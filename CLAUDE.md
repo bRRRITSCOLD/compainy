@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides nine specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
+This is a **Claude Code plugin** — the `ai` plugin from the `bRRRITSCOLD/ai` marketplace entry. It provides ten specialist agents and a shared library of engineering-principle skills for a full-stack feature-delivery team.
 
 ### Layout
 
@@ -21,8 +21,9 @@ agents/
   systems-architect.md # system topology, service boundaries, ADRs, NFRs, tech selection
   data-architect.md    # store selection, schema design, vector/RAG data modeling, aggregate-to-schema mapping
   security-architect.md # threat modeling, auth/secrets/data-protection design, supply-chain, deep security review
+  lead-engineer.md     # tech lead — owns the implementation plan (architecture → sequenced PR-sized build plan); cross-cutting technical decisions
   staff-engineer.md    # read-only reviewer against all four principle skills
-  project-manager.md   # plans + tracks epics as GitHub issues; assigns agents; does not dispatch
+  project-manager.md   # work breakdown — turns the lead-engineer's plan into epics/issues; tracks; does not dispatch or author the technical plan
 
 skills/
   principles-tdd/          # TDD discipline — single source of truth

@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "ai",
-      "description": "Personal AI dev team: UX, frontend, backend, staff engineer agents + shared engineering-principle skills.",
+      "description": "Personal AI dev team: ten specialist agents (UX, frontend, backend, devops, architects, lead/staff engineers, PM) + shared engineering-principle skills.",
       "source": "./",
       "category": "productivity"
     },

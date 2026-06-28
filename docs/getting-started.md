@@ -45,11 +45,14 @@ It interviews you and writes `.ai/stack-profile.md`; the implementation skills r
 Run `/ai:deliver "<goal>"` once. It sequences the team across the upfront phases:
 
 - **Frame** (brainstorming) — pin the real requirement and done-criteria.
-- **Plan** (`project-manager`) — decompose the goal into **epics**, each into tracked GitHub issues with agent assignments and dependency edges.
 - **Architecture** (`systems-architect`) — topology, ADRs, NFRs; it **delegates the security posture to `security-architect`** (threat model — STRIDE, trust boundaries — for anything with auth, money, PII, or multi-tenant data) and **store choice to `data-architect`**.
 - **Data** (`data-architect`) — schemas, indexing, migrations.
+- **Plan the build** (`lead-engineer`) — turn the decided design into one coherent, sequenced, PR-sized **implementation plan** (build order, integration seams, test hooks). The technical plan comes from the tech lead, not the PM.
+- **Decompose & track** (`project-manager`) — break that implementation plan into **epics → tracked GitHub issues** with agent assignments and dependency edges. The PM does the work breakdown of the plan; it does not author the technical sequencing.
 - **Platform/DevEx** (`devops-engineer`) — stand up the local dev loop (`docker-compose`, task runner, seeds) and CI/CD **early**, so everyone builds against working infra.
 - **Build** — the first vertical slice, through the dispatch → review → merge loop.
+
+The order matters: **design → implementation plan → issue breakdown**. The PM never decomposes before the technical plan exists — it transcribes the lead-engineer's sequencing into issues.
 
 End the kickoff session with the `handoff` skill so the next session resumes instantly.
 
@@ -84,7 +87,7 @@ Why one epic per cycle: bounded context (cheaper, sharper), bounded blast radius
 
 Per-epic, set `--rounds`/`--budget` to the epic's size. Small epic → `--rounds 8`; large → `--rounds 15`. Keep epics small enough that one cycle finishes one epic.
 
-## The team (9 agents)
+## The team (10 agents)
 
 | Agent | Role |
 |---|---|
@@ -95,8 +98,9 @@ Per-epic, set `--rounds`/`--budget` to the epic's size. Small epic → `--rounds
 | `systems-architect` | Topology, service boundaries, ADRs, NFRs, tech selection |
 | `data-architect` | Store selection, schema design, vector/RAG modeling |
 | `security-architect` | Threat model, auth/secrets/data-protection design, deep security audit |
+| `lead-engineer` | Tech lead — owns the implementation plan (design → sequenced PR-sized build plan); cross-cutting technical calls |
 | `staff-engineer` | Read-only reviewer — the gate after every implementation |
-| `project-manager` | Decomposes goals into epics/issues, sequences, tracks (does **not** dispatch) |
+| `project-manager` | Work breakdown — turns the lead-engineer's plan into epics/issues; tracks (does **not** author the plan or dispatch) |
 
 Subagents can't spawn subagents — all dispatch happens at the main session, never from inside an agent.
 
@@ -111,9 +115,9 @@ Subagents can't spawn subagents — all dispatch happens at the main session, ne
 Paste this in the **kickoff session** (adapt the goal/stack/links). It frames + plans + architects the whole goal, then builds only the first slice.
 
 ```
-Build <PRODUCT> in THIS repo. You have the `ai` plugin (9 agents: ux-designer,
+Build <PRODUCT> in THIS repo. You have the `ai` plugin (10 agents: ux-designer,
 frontend-engineer, backend-engineer, devops-engineer, systems-architect,
-data-architect, security-architect, staff-engineer, project-manager) + superpowers
+data-architect, security-architect, lead-engineer, staff-engineer, project-manager) + superpowers
 + the figma companion. Full permission to auto-approve tools, gh, branches, PRs,
 squash-merges. One orchestration in this repo only.
 
@@ -121,10 +125,12 @@ squash-merges. One orchestration in this repo only.
    and write .ai/stack-profile.md. [e.g. "uses floci for AWS-local, NOT localstack;
    docker-compose for mongodb/postgres/redis/rabbitmq"]
 
-1. KICKOFF: run /ai:deliver to frame the goal, decompose it into EPICS + tracked
-   GitHub issues, and decide the architecture — pull in security-architect to
-   threat-model (multi-tenant isolation / auth / PII) and data-architect for the
-   data model. Have devops-engineer stand up the local dev loop + CI/CD early.
+1. KICKOFF: run /ai:deliver to frame the goal and decide the architecture first —
+   pull in security-architect to threat-model (multi-tenant isolation / auth / PII)
+   and data-architect for the data model. THEN have lead-engineer turn that design
+   into the implementation plan, and only then project-manager decompose the plan
+   into EPICS + tracked GitHub issues (design → plan → issues, in that order). Have
+   devops-engineer stand up the local dev loop + CI/CD early.
 
 GOAL: <bullets — capabilities, constraints, retention, multi-tenancy, etc.>
 

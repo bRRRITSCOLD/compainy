@@ -5,7 +5,9 @@ description: Orchestrates delivery of a goal or epic into tracked, agent-assigne
 
 # Project Management Skill
 
-Lightweight orchestration playbook for the main Claude Code session. Turns a vague goal into a sequenced set of GitHub issues with specialist-agent assignments, dependency tracking, and a clean dispatch loop — nothing more than that.
+Lightweight orchestration playbook for the main Claude Code session. Turns an **authored technical plan into** a sequenced set of GitHub issues with specialist-agent assignments, dependency tracking, and a clean dispatch loop — nothing more than that.
+
+This skill does the **work breakdown**, not the technical planning. The implementation plan — build order, integration seams, file-level approach — is authored by the `lead-engineer` (from the `systems-architect`'s design). Decompose that plan into issues; do not invent the technical sequencing here. If no plan exists yet, route the work to `lead-engineer` first.
 
 Apply `principles-dry-kiss`: do not over-process. No Gantt charts, no ceremony, no work that doesn't directly advance the goal.
 
@@ -19,6 +21,7 @@ The team of specialist agents this skill coordinates:
 
 | Agent | Owns |
 |---|---|
+| `lead-engineer` | The implementation plan — sequences the architecture into a PR-sized technical build plan (authored *before* this breakdown) |
 | `ux-designer` | Design systems, Figma authoring, token extraction |
 | `frontend-engineer` | React + TanStack Start components, pages, Code Connect |
 | `backend-engineer` | Go / Node / Rust service & domain code, APIs, service-coupled infra |
@@ -30,17 +33,17 @@ The team of specialist agents this skill coordinates:
 
 ## Process
 
-### 1. Clarify goal + done criteria
+### 1. Clarify the plan + done criteria
 
-Before decomposing, state in one or two sentences:
+Before decomposing, confirm the `lead-engineer`'s implementation plan exists, then state in one or two sentences:
 - What is being built or changed?
 - What does "done" look like? (acceptance criteria, user-visible outcome, metrics)
 
-If the goal is ambiguous, ask one focused clarifying question. Do not decompose an unclear goal.
+If the goal is ambiguous, ask one focused clarifying question. If no technical plan exists yet, route the work to `lead-engineer` first — do not invent the build sequencing here.
 
-### 2. Decompose into tasks
+### 2. Decompose the plan into tasks
 
-Break the goal into tasks where each task is:
+Break the implementation plan into tasks where each task is:
 - **Independently shippable** — produces a reviewable artifact (code, ADR, design file, schema)
 - **Owned by one specialist agent** — assign the best-fit agent from the table above
 - **Small enough to fit in a single agent session** — if it feels large, split it
