@@ -26,8 +26,8 @@ until (open issues == 0) or (iterations >= CAP) or (budget exhausted):
   if ready empty and open > 0:
     report blocker; stop
   for issue in ready (respecting parallel-safe vs serial):
-    dispatch assigned specialist agent  -> branch + implement + PR (git-workflow)
-    dispatch staff-engineer review      -> GATE
+    dispatch specialist (model:'sonnet')  -> branch + implement + PR (git-workflow)
+    dispatch staff-engineer review (model: OMIT => inherit top tier)  -> GATE
     if approved:
       squash-merge per git-workflow
     else:
@@ -101,9 +101,16 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/workflows/deliver.workflow.mjs
 
 This gives deterministic fan-out with a built-in budget guard and explicit Scout → Build → Verify phases. The Workflow tool requires explicit opt-in by the user. Review the script before first real use — it creates PRs and merges only after the staff-engineer review gate passes.
 
-### (B) `/loop` or ScheduleWakeup — for long unattended or polling runs
+### (B) `/loop`, ScheduleWakeup, or plain main-session dispatch
 
-Use Claude Code's built-in `/loop` command or `ScheduleWakeup` (host features, not skills in this plugin) to re-check ready issues on each tick (or self-paced). Good for overnight runs or when the goal spans many sessions. Pair with the DURABLE STATE guard — write the progress ledger each tick so any session can resume.
+Use Claude Code's built-in `/loop` command or `ScheduleWakeup` (host features, not skills in this plugin) to re-check ready issues on each tick (or self-paced), or just run the loop inline in the main session. Good for overnight runs or when the goal spans many sessions. Pair with the DURABLE STATE guard — write the progress ledger each tick so any session can resume.
+
+> **MODEL TIERING IS NOT AUTOMATIC IN MODE B.** Unlike mode A (the Workflow script's `MODEL` map), when the main session dispatches directly it must **set the Agent tool's `model` parameter on every dispatch** — leaving it unset silently inherits the session's most expensive model (the Opus trap). This is mandatory, not advisory:
+> - implementer + fix → `model: 'sonnet'`
+> - scout / merge / status / validate → `model: 'haiku'`
+> - **staff-engineer review gate → omit `model`** (deliberately inherits the session's top tier; never run the gate below the implementer)
+>
+> If you want tiering without having to remember this on every call, use **mode A** — the Workflow script applies the `MODEL` map deterministically. Mode B tiers only as well as the dispatcher remembers to set `model`.
 
 ## Honesty constraint
 
