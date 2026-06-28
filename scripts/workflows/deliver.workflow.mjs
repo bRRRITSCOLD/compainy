@@ -27,14 +27,23 @@ export const meta = {
 //   Workflow({ name: 'deliver', args: { maxRounds: 30, budgetThreshold: 0 } })
 // Each falls back to its default when the arg is absent or non-numeric.
 // An explicit 0 is finite, so it is preserved — e.g. budgetThreshold: 0 disables the budget check.
+//
+// NOTE: `args` can arrive as a JSON STRING rather than an object (depending on how
+// the Workflow tool is invoked). Normalize it ONCE here — otherwise `args?.maxRounds`
+// et al. are `undefined` on a string and EVERY override silently falls back to its
+// default. Read all overrides from `A`, never `args` directly.
+const A = (() => {
+  try { return typeof args === 'string' ? JSON.parse(args) : (args ?? {}); }
+  catch { return {}; }
+})();
 const toNum = (v, fallback) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
-const MAX_ITERATIONS   = toNum(args?.maxRounds, 20);       // hard cap on loop rounds
-const MAX_EMPTY_ROUNDS = toNum(args?.maxEmptyRounds, 3);   // stop after this many rounds with no merged PRs
-const BUDGET_THRESHOLD = toNum(args?.budgetThreshold, 5000); // stop if remaining tokens fall below this (0 = skip check)
+const MAX_ITERATIONS   = toNum(A.maxRounds, 20);       // hard cap on loop rounds
+const MAX_EMPTY_ROUNDS = toNum(A.maxEmptyRounds, 3);   // stop after this many rounds with no merged PRs
+const BUDGET_THRESHOLD = toNum(A.budgetThreshold, 5000); // stop if remaining tokens fall below this (0 = skip check)
 // Concurrency is OFF by default — a round runs serially. Set args.parallel:true
 // to fan out a round concurrently; safe only because the mutating implement/fix
 // agents run with isolation:'worktree'. Never enable parallel without isolation.
-const PARALLEL = args?.parallel === true;
+const PARALLEL = A.parallel === true;
 
 // --- Model & effort tiering (per dispatched stage) ---
 // Tier by cognitive load, not by agent identity. Mechanical steps run cheap;
@@ -42,13 +51,13 @@ const PARALLEL = args?.parallel === true;
 // inherits the session's top model (Opus when the user runs Opus) at high effort.
 // Override any tier via args.models, e.g. args: { models: { implement: { model: 'opus' } } }.
 const MODEL = {
-  scout:     { model: 'haiku',  effort: 'low',    ...(args?.models?.scout) },
-  implement: { model: 'sonnet', effort: 'medium', ...(args?.models?.implement) },
-  fix:       { model: 'sonnet', effort: 'medium', ...(args?.models?.fix) },
-  review:    { effort: 'high',                     ...(args?.models?.review) },   // model omitted => inherit (top model); the gate stays sharp
-  security:  { effort: 'high',                     ...(args?.models?.security) },  // deep audit — top model (inherit), like the review gate
-  merge:     { model: 'haiku',  effort: 'low',    ...(args?.models?.merge) },
-  verify:    { model: 'sonnet', effort: 'low',    ...(args?.models?.verify) },
+  scout:     { model: 'haiku',  effort: 'low',    ...(A.models?.scout) },
+  implement: { model: 'sonnet', effort: 'medium', ...(A.models?.implement) },
+  fix:       { model: 'sonnet', effort: 'medium', ...(A.models?.fix) },
+  review:    { effort: 'high',                     ...(A.models?.review) },   // model omitted => inherit (top model); the gate stays sharp
+  security:  { effort: 'high',                     ...(A.models?.security) },  // deep audit — top model (inherit), like the review gate
+  merge:     { model: 'haiku',  effort: 'low',    ...(A.models?.merge) },
+  verify:    { model: 'sonnet', effort: 'low',    ...(A.models?.verify) },
 };
 
 // --- Security gate ---
@@ -59,8 +68,8 @@ const MODEL = {
 //   'always'              — audit every PR (high assurance, higher cost).
 //   'off'                 — staff gate only (no security audit).
 // Override per run: args: { securityReview: 'always' }.
-const SECURITY_REVIEW = ['always', 'off', 'sensitive'].includes(args?.securityReview)
-  ? args.securityReview
+const SECURITY_REVIEW = ['always', 'off', 'sensitive'].includes(A.securityReview)
+  ? A.securityReview
   : 'sensitive';
 const needSecurity = (sensitive) =>
   SECURITY_REVIEW === 'always' || (SECURITY_REVIEW !== 'off' && sensitive);
