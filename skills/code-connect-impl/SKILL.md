@@ -1,11 +1,15 @@
 ---
 name: code-connect-impl
-description: Implements Figma Code Connect mappings (*.figma.tsx) for the built React component library. Invoked when the user says "wire Code Connect to components", "implement figma.tsx mappings", "link React components to Figma", "publish Code Connect", "update code connect after component change", "validate figma.tsx files", or "Figma Dev Mode shows wrong snippets". Engineering counterpart to the figma-code-connect skill — operates on built components, not stubs.
+description: Implements and publishes Figma Code Connect mappings (*.figma.tsx) for the built React component library. Invoked when the user says "wire Code Connect to components", "implement figma.tsx mappings", "link React components to Figma", "set up Code Connect", "publish Code Connect", "update code connect after component change", "validate figma.tsx files", or "Figma Dev Mode shows wrong snippets". Owned by frontend-engineer — Code Connect is React code mapping built components to their Figma source.
 ---
 
 # Code Connect Implementation Skill
 
-Wire every built React component to its Figma counterpart by implementing `*.figma.tsx` mapping files. After publishing, Figma's Dev Mode shows live, accurate, copy-pasteable component code — not generated stubs. This is the engineering counterpart to `figma-code-connect` (which documents the mapping API); this skill operates against real, built components.
+The single Code Connect skill, owned by `frontend-engineer`: wire every built React component to its Figma counterpart by implementing `*.figma.tsx` mapping files, then validate and publish. After publishing, Figma's Dev Mode shows live, accurate, copy-pasteable component code — not generated stubs.
+
+Code Connect belongs to the engineer, not the designer: the mapping file is React/TS code that imports the built component and binds the component's real prop API to the Figma component's properties. `ux-designer` authors the Figma source (components, variables, tokens); this skill maps that source to the code the `frontend-engineer` built from it.
+
+> **Publishing does not require the Figma MCP.** `npx figma connect validate`/`publish` use the `FIGMA_ACCESS_TOKEN` env var (a CLI/REST path), so this works even when the remote Figma MCP — an OAuth server a dispatched subagent may not reach — is unavailable. The MCP read tools in step 2 are a convenience for discovery; if they are unreachable, enumerate components from the `ux-designer`'s handoff instead (the `design-system.md` component inventory + node IDs in the Figma file URL) and proceed via the CLI. The token-based publish is the reliable path.
 
 ## Process
 
