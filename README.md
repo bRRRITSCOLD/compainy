@@ -80,6 +80,8 @@ The implementation skills default to a specific stack (TanStack Start, Go/Node/R
 
 Frame → Plan & track → Architecture → Data → Build loop → Finish. Run `/deliver <goal>` to start — it invokes the `feature-delivery` skill, which sequences the specialist agents across all phases and scales the process to the size of the goal.
 
+**New here? Read [docs/getting-started.md](docs/getting-started.md)** — the full `/init-stack → /deliver → /orchestrate` flow, the one-epic-per-session rhythm that keeps context clean and cost bounded, the autonomous-loop guards, and paste-ready kickoff + per-epic prompts.
+
 ## Autonomous orchestration
 
 Once a goal is decomposed into GitHub issues, run `/orchestrate <goal or #issues>` to drive them to done automatically. The `autonomous-delivery` skill runs a dispatch → staff-review gate → squash-merge loop until all open issues are closed and CI is green, or until a guard trips (max iterations, K consecutive empty rounds, or token budget exhausted). A Workflow-tool reference script lives at `scripts/workflows/deliver.workflow.mjs` for deterministic fan-out with a built-in budget guard; review it before first use.
