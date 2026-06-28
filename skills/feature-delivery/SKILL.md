@@ -71,8 +71,8 @@ For each ready issue (wave order, blockers closed):
    - `backend-engineer` — service & domain code, APIs, service-coupled infra (`backend-service-patterns`, `cloud-infra`)
    - `devops-engineer` — platform & DevEx: IaC provisioning, CI/CD, local dev loop, containers, observability (`cloud-infra`, `devex`, `ci-cd`). Stand up the local dev loop + pipelines early so the other specialists build against working infra.
    - `security-architect` — threat model + security posture for anything handling auth, money, PII, multi-tenant data, or untrusted input (`threat-modeling`, `security-review`). Threat-model during the architecture phase so security requirements seed the build; run the deep security audit on sensitive diffs.
-   - `ux-designer` — design system, tokens, Figma authoring (`figma-design-system`, `figma-code-connect`, `design-theming`). **The Figma MCP is a remote OAuth server that a dispatched subagent may not reach.** ux-designer probes (`whoami`) and, if it can't write directly, returns a complete Figma build spec — the main session then executes the writes as its hands. Do not skip ux-designer or improvise the design yourself; it owns every design decision. Accept only a complete system (all components, breakpoints, states), never a token-only stub.
-   - `frontend-engineer` — React + TanStack Start components, pages (`react-component-library`, `code-connect-impl`, `pages-templates`)
+   - `ux-designer` — design system, tokens, Figma authoring (`figma-design-system`, `design-theming`). **The Figma MCP is a remote OAuth server that a dispatched subagent may not reach.** ux-designer probes (`whoami`) and, if it can't write directly, returns a complete Figma build spec — the main session then executes the writes as its hands. Do not skip ux-designer or improvise the design yourself; it owns every design decision. Accept only a complete system (all components, breakpoints, states), never a token-only stub. Code Connect is **not** its job — it hands the frontend a component inventory (names + node IDs).
+   - `frontend-engineer` — React + TanStack Start components, pages, and **Code Connect** for its built components (`react-component-library`, `code-connect-impl`, `pages-templates`). Code Connect publish is CLI + `FIGMA_ACCESS_TOKEN`, so it works even when the Figma MCP can't reach the subagent.
 2. **Review** — invoke `staff-engineer` on the diff.
 3. **Merge** — squash-merge the PR; close the issue.
 4. **Update tracking** — mark closed; check what the next wave unlocks.
@@ -157,12 +157,12 @@ Wave 3 (after #5, #2):
 ### Phase 5 output (PRs)
 
 - PR #1: Shared contracts — NATS subjects + ClickHouse `logs` schema migration (the foundations everything binds to).
-- PR #2: Figma design system — log explorer tokens, `LogRow`, `LiveTail`, `AlertRuleForm` components, Code Connect wired.
+- PR #2: Figma design system — log explorer tokens, `LogRow`, `LiveTail`, `AlertRuleForm` components, plus the component inventory (names + node IDs) for the frontend's Code Connect.
 - PR #3: Go+Gin ingestor — `/ingest` endpoint, NATS JetStream publish, Zod-validated payload schema, unit + integration tests.
 - PR #4: Log processor — NATS consumer → ClickHouse batch insert, retry/backoff, health metrics.
 - PR #5: Query API — full-text search, time-range, label filters, cursor pagination.
 - PR #6: Alert rules engine — rule evaluation loop, Slack/PagerDuty notification dispatch.
-- PR #7: TanStack Start log explorer — live tail via SSE, nuqs for URL-driven filter state, tanstack-form for alert rule authoring.
+- PR #7: TanStack Start log explorer — live tail via SSE, nuqs for URL-driven filter state, tanstack-form for alert rule authoring; Code Connect mappings (`*.figma.tsx`) wired + published for the built components.
 
 ### Phase 6 output
 

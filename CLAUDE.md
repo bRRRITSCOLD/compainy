@@ -31,10 +31,9 @@ skills/
   principles-pragmatic-solid/  # pragmatic SOLID — single source of truth
   principles-dry-kiss/     # DRY/KISS — single source of truth
   figma-design-system/     # build/extract design systems in Figma
-  figma-code-connect/      # author and publish Code Connect mappings
   design-theming/          # per-brand token overrides
   react-component-library/ # typed, accessible React components from tokens
-  code-connect-impl/       # *.figma.tsx mapping files; npx figma connect publish
+  code-connect-impl/       # *.figma.tsx mapping files; npx figma connect publish (owned by frontend-engineer)
   pages-templates/         # TanStack Start layout templates and page routes
   backend-service-patterns/ # hexagonal arch, per-language patterns
   cloud-infra/             # AWS/Cloudflare/Hetzner IaC and observability (backend + devops)
