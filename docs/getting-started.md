@@ -92,7 +92,7 @@ Per-epic, set `--rounds`/`--budget` to the epic's size. Small epic → `--rounds
 | Agent | Role |
 |---|---|
 | `ux-designer` | Authors the design system **in Figma**; extracts tokens; hands off component inventory (Code Connect → frontend) |
-| `frontend-engineer` | React + TanStack Start from tokens (shadcn/ui on Base UI); pages; wires + publishes Code Connect |
+| `frontend-engineer` | React + TanStack Start from tokens (shadcn/ui on Base UI); pages; wires Code Connect (Org/Enterprise plan; on Pro → manual mapping doc instead) |
 | `backend-engineer` | Go/Node/Rust service & domain code, APIs, service-coupled infra |
 | `devops-engineer` | Platform & DevEx: IaC, CI/CD, local dev loop, containers, observability |
 | `systems-architect` | Topology, service boundaries, ADRs, NFRs, tech selection |
@@ -136,7 +136,7 @@ GOAL: <bullets — capabilities, constraints, retention, multi-tenancy, etc.>
 
 DESIGN (Figma must be authed with write access):
   - Design system source: <figma url> → ux-designer builds it IN Figma + tokens + component inventory
-  - App screens: <figma url> → frontend-engineer builds FROM the design system (responsive) + wires Code Connect for the built components
+  - App screens: <figma url> → frontend-engineer builds FROM the design system (responsive) + wires Code Connect for the built components (on a Figma Org/Enterprise plan; on Pro it emits a manual mapping doc + token-parity check instead)
 
 DISCIPLINE: principle skills (TDD, DDD strategic-always, pragmatic SOLID, DRY/KISS/YAGNI);
   test-design seeds adversarial cases; git-workflow (small cohesive revertible PRs,

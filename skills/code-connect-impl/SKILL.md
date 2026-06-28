@@ -5,13 +5,38 @@ description: Implements and publishes Figma Code Connect mappings (*.figma.tsx) 
 
 # Code Connect Implementation Skill
 
-The single Code Connect skill, owned by `frontend-engineer`: wire every built React component to its Figma counterpart by implementing `*.figma.tsx` mapping files, then validate and publish. After publishing, Figma's Dev Mode shows live, accurate, copy-pasteable component code — not generated stubs.
+The single Code Connect skill, owned by `frontend-engineer`: wire every built React component to its Figma counterpart by implementing `*.figma.tsx` mapping files, then validate and publish. After publishing, Figma's Dev Mode shows live, accurate, copy-pasteable component code — not generated stubs. **Plan-gated — Code Connect requires a Figma Organization or Enterprise plan (see step 0); on Pro or lower it is skipped, and the component library ships without it.**
 
 Code Connect belongs to the engineer, not the designer: the mapping file is React/TS code that imports the built component and binds the component's real prop API to the Figma component's properties. `ux-designer` authors the Figma source (components, variables, tokens); this skill maps that source to the code the `frontend-engineer` built from it.
 
 > **Publishing does not require the Figma MCP.** `npx figma connect validate`/`publish` use the `FIGMA_ACCESS_TOKEN` env var (a CLI/REST path), so this works even when the remote Figma MCP — an OAuth server a dispatched subagent may not reach — is unavailable. The MCP read tools in step 2 are a convenience for discovery; if they are unreachable, enumerate components from the `ux-designer`'s handoff instead (the `design-system.md` component inventory + node IDs in the Figma file URL) and proceed via the CLI. The token-based publish is the reliable path.
 
 ## Process
+
+### 0. Plan gate — Code Connect requires Figma Organization or Enterprise
+
+**Code Connect is not available on Starter or Professional plans — only Organization and Enterprise** (it also needs Dev Mode). If the project's Figma plan is **Pro or lower, skip this skill entirely**: do not author `*.figma.tsx` files and do not attempt to publish — the plan can't accept the mappings, so it is wasted work. The built React component library is unaffected; only the optional Dev Mode mapping needs the plan.
+
+Decide the gate before doing anything else:
+- **Known Org/Enterprise** (stated by the project, or declared in `.ai/stack-profile.md`) → proceed to step 1 (full Code Connect).
+- **Known Pro or lower** → skip the publish; produce the **Pro fallback** (step 0a) instead. Record "Code Connect publish deferred — requires Figma Org/Enterprise; project is on <plan>; manual mapping doc emitted" in the handoff/PR.
+- **Unknown** → default to the Pro fallback. Optionally confirm the real plan with a single `npx figma connect publish` attempt; a plan/permission error (e.g. not-entitled / unsupported-plan) confirms the gate. Do not loop retrying.
+
+Never silently mark Code Connect "done" when the publish was skipped — say it was deferred, why, and that the fallback doc stands in.
+
+### 0a. Pro fallback — manual mapping doc + token parity (no Org/Enterprise)
+
+When gated out, don't ship nothing. The Figma MCP **read** tools (`get_metadata`, `get_design_context`, `get_variable_defs`) and the extracted `tokens.json` still work on any plan — enough to give design↔code traceability without the Dev Mode publish. Produce two artifacts:
+
+1. **Manual mapping doc** — `docs/design/code-connect-map.md`: a table mapping each Figma component (name + node ID) → its React component path → prop correspondence (Figma property → React prop), written by hand the same way a `*.figma.tsx` would map them. This is the human-readable stand-in for Dev Mode snippets and the seed for real Code Connect later.
+
+   | Figma component (node ID) | React component | Prop mapping |
+   |---|---|---|
+   | `Button` (`12:34`) | `src/components/Button.tsx` | Variant→`variant`, Size→`size`, Disabled→`disabled`, Label→children |
+
+2. **Token-parity check** — confirm every component sources its visual values from `tokens.json` (no hardcoded colors/spacing/radii that would silently drift from the Figma variables). Flag any divergence. This is the `react-component-library` token-as-source-of-truth discipline, audited as a traceability gate.
+
+This is **not** a full substitute — there are no live Dev Mode code snippets — but it is real, reviewable traceability now, and the upgrade path is clean: when the project moves to Org/Enterprise, the mapping doc + the `ux-designer`'s component inventory convert directly into `*.figma.tsx` files (steps 1–7).
 
 ### 1. Confirm prerequisites
 
@@ -138,6 +163,12 @@ Add a CI step to catch drift before it reaches production:
 
 ### 7. Self-review checklist
 
+**If gated to the Pro fallback (step 0a):**
+- [ ] `docs/design/code-connect-map.md` covers every built component (Figma node ID → React path → prop mapping).
+- [ ] Token-parity check passed — no component hardcodes values that diverge from `tokens.json`.
+- [ ] The deferral is recorded (handoff/PR): publish skipped, plan reason, fallback doc emitted.
+
+**If full Code Connect (Org/Enterprise):**
 - [ ] Every component in `src/components/` has a co-located `*.figma.tsx`.
 - [ ] Every Figma component with `get_code_connect_map` returning no mapping now has one.
 - [ ] `npx figma connect validate` exits zero.

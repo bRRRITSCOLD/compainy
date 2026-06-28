@@ -7,7 +7,7 @@ Personal AI dev-team plugin for Claude Code. Ten specialist agents — UX design
 A Claude Code plugin that gives you a complete feature-delivery team:
 
 - **ux-designer** — authors design systems and UX work directly in Figma using the official Figma MCP write tools; extracts tokens for code consumers; hands the frontend a component inventory (names + node IDs). Code Connect mapping is React code — that's the frontend-engineer's job.
-- **frontend-engineer** — takes Figma designs all the way to production-ready React + TanStack Start code; builds typed, accessible component libraries from `tokens.json`; wires Figma Code Connect (`*.figma.tsx` + publish) for its built components; composes pages and templates.
+- **frontend-engineer** — takes Figma designs all the way to production-ready React + TanStack Start code; builds typed, accessible component libraries from `tokens.json`; wires Figma Code Connect (`*.figma.tsx` + publish) for its built components on a Figma Org/Enterprise plan — on Pro it emits a manual mapping doc + token-parity check instead; composes pages and templates.
 - **backend-engineer** — designs and implements high-performance services in Go, Node/TypeScript, and Rust; applies hexagonal/ports-and-adapters architecture; authors the infra coupled to its own service.
 - **devops-engineer** — owns the platform and developer experience: IaC provisioning (AWS, Cloudflare, Hetzner), CI/CD pipelines and release automation, the local dev loop (docker-compose, task runner, seeds), containers, and observability.
 - **systems-architect** — designs system topology, defines service and bounded-context boundaries, authors ADRs, evaluates non-functional requirements, and selects technology with explicit tradeoffs.
