@@ -1,6 +1,6 @@
 {
   "name": "compainy",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "Personal AI dev team: ten specialist agents (UX, frontend, backend, devops, systems/data/security architects, lead engineer, staff engineer, project manager) plus the shared TDD/DDD/pragmatic-SOLID/DRY-KISS skills they operate by. Requires the superpowers and figma companion plugins.",
   "author": {
     "name": "Blaine Richardson",
