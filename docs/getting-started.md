@@ -74,15 +74,17 @@ Why one epic per cycle: bounded context (cheaper, sharper), bounded blast radius
 
 ## Two ways the loop runs — and the one you want for cost
 
-`/orchestrate` can run the loop two different ways, and **which one you get matters for your bill.** By default it runs **mode B**; the cheaper, more capable path is **mode A**, but you have to ask for it explicitly.
+`/orchestrate` can run the loop two different ways, and **which one you get matters for your bill.** Both run the **same loop with the same capabilities** — the difference is *enforcement*: mode A (the script) does it deterministically in code; mode B (the inline default) is the same playbook executed by the session, so each step holds only if the session follows it. Mode A is recommended for cost because it can't *forget* to tier models or enforce a guard. You have to ask for mode A explicitly.
 
 | | **Mode A — the Workflow tool** (recommended) | **Mode B — inline** (the `/orchestrate` default) |
 |---|---|---|
-| What runs | the reference script `deliver.workflow.mjs` | the main session runs the loop step by step |
-| Model tiering | **automatic** — scout/merge on haiku, implement on sonnet, the review + security gates on the top model | **manual** — you must set the Agent `model` per dispatch, or it silently inherits the session's top model (Opus) for *everything* |
-| Guards | `maxRounds` / `maxEmptyRounds` / `budgetThreshold` enforced by the script | you enforce them yourself |
-| Security gate | `security-architect` 2nd gate, conditional (`securityReview`) | not wired |
+| What runs | the reference script `deliver.workflow.mjs` | the main session runs the **same loop** step by step |
+| Model tiering | **automatic** — the script's `MODEL` map: scout/merge haiku, implement sonnet, review + security gates inherit top | **same tiers, set per dispatch** — the session must pass the Agent `model` each time (skill-mandated); forget it and it inherits the session's top model (Opus) for *everything* — the cost trap |
+| Guards | `maxRounds` / `maxEmptyRounds` / `budgetThreshold` enforced by the script | **same caps**, enforced by the session per the skill |
+| Security gate | `security-architect` 2nd gate, automatic on sensitive diffs (`securityReview`) | **same gate** — the session dispatches `security-architect` on sensitive diffs per the loop playbook |
 | Runs | in the background (watch `/workflows`) | inline in your session |
+
+So mode B isn't *missing* anything — it's the same `autonomous-delivery` loop, just hand-executed. Its risk is discipline: a skipped tier silently bills at top tier, a skipped guard runs long. Mode A removes that risk by encoding the playbook in the script.
 
 **Bare `/orchestrate` stays in mode B.** It does *not* auto-pick the script. To get mode A you must explicitly invoke the **Workflow tool**:
 
@@ -108,7 +110,7 @@ The phrase **"run it with the Workflow tool"** is the opt-in (the Workflow tool 
 | **Budget** | stop when remaining tokens < N | `--budget N` (default 5000; `0` disables) |
 | **One orchestration/repo** | no concurrent runs double-dispatching | operational rule |
 | **Review gate** | every PR through `staff-engineer` before merge; one fix pass then flag-open | always on |
-| **Security gate** | `security-architect` deep audit as a 2nd gate on security-sensitive diffs (mode A) | `args.securityReview`: `sensitive` (default) / `always` / `off` |
+| **Security gate** | `security-architect` deep audit as a 2nd gate on security-sensitive diffs (both modes — automatic in A, dispatched by the session in B) | `args.securityReview`: `sensitive` (default) / `always` / `off` |
 | **Model tiering** | cheap models for mechanical steps, top model for the review/security gates | **automatic in mode A**; manual per-dispatch in mode B |
 | **Commit-early + claim** | implementers commit scaffolds immediately; issues are claimed so two agents never collide | always on |
 
