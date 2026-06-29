@@ -119,7 +119,9 @@ This gives deterministic Scout → Build → Verify fan-out, **automatic model t
 
 **Opt-in + the two gotchas:**
 - The Workflow tool fires only on explicit user opt-in (e.g. "run it with the Workflow tool"). **`/orchestrate` does NOT auto-select mode A** — bare `/orchestrate` runs mode B below. To force the script from the command, the user appends "use the Workflow tool (mode A)".
-- All overrides go through `args`: `maxRounds`, `maxEmptyRounds`, `budgetThreshold` (a literal `0` disables the budget check — set a real floor for unattended runs), `parallel`, `models`, `securityReview` (`sensitive` default / `always` / `off`). The script normalizes `args` whether it arrives as an object or a JSON string, so either is safe; omitted keys keep their defaults.
+- All overrides go through `args`: `maxRounds`, `maxEmptyRounds`, `budgetThreshold` (a literal `0` disables the budget check — set a real floor for unattended runs), `parallel`, `models`, `securityReview` (`sensitive` default / `always` / `off`), `labels`, `excludeLabels`. The script normalizes `args` whether it arrives as an object or a JSON string, so either is safe; omitted keys keep their defaults.
+- **Scope to one epic/wave with `labels`** (string, comma-list, or array): the loop drives only issues carrying one of those labels — e.g. `args: { labels: 'wave-1' }`. Scout still lists ALL open issues for dependency truth, so a `wave-1` issue `blockedBy` a still-open `wave-0` issue is correctly held, not built blind. This is the mode-A way to do one-epic-per-cycle.
+- **`epic`-labeled issues are NEVER dispatched** — they're milestone containers, not buildable units, and an epic only closes once its children do, so it's also excluded from dependency truth (treating it as a `blockedBy` dep would deadlock its children). Add more non-buildable labels via `excludeLabels` (string/array); `epic` is always excluded.
 
 Review the script before first real use — it creates PRs and merges only after the staff-engineer review gate (and, on sensitive diffs, the security-architect gate) passes.
 

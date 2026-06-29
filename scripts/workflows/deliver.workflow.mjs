@@ -99,8 +99,11 @@ const scoutResult = await agent(
 
   Parse each remaining issue's body for lines matching "Depends on: #N" or "blockedBy: #N".
   Return a JSON object with:
-  - openIssues: array of { number, title, agent (from labels or assignees), blockedBy: number[] }
+  - openIssues: array of { number, title, agent (from labels or assignees), labels (ALL label names on the issue, string[]), blockedBy: number[] }
   - totalOpen: number
+
+  List EVERY open issue (do not pre-filter by any label other than the in-progress
+  exclusion) — downstream scoping needs the full set so cross-label dependencies stay visible.
 
   If gh is not available or returns an error, return { openIssues: [], totalOpen: 0, error: string }.`,
   {
@@ -118,6 +121,7 @@ const scoutResult = await agent(
               number:    { type: 'number' },
               title:     { type: 'string' },
               agent:     { type: 'string' },
+              labels:    { type: 'array', items: { type: 'string' } },
               blockedBy: { type: 'array', items: { type: 'number' } },
             },
             required: ['number', 'title', 'agent', 'blockedBy'],
@@ -143,7 +147,43 @@ if (scoutResult.error) {
   const seen = new Set();           // issues attempted this run (dedup across rounds)
   let iterations = 0;
   let emptyRounds = 0;
-  let openIssues = scoutResult.openIssues;
+
+  // Optional label scoping (e.g. one epic/wave per run): drive only issues that
+  // carry one of args.labels (or args.label — string, comma-list, or array).
+  // IMPORTANT: scout listed ALL open issues, and `allOpenNumbers` is the snapshot
+  // of every open issue number — dependency truth. We filter the WORKING set only,
+  // so a labeled issue blockedBy a still-open DIFFERENT-label issue is correctly
+  // held (that blocker stays in allOpenNumbers), instead of building on it blind.
+  const TARGET_LABELS = (() => {
+    const l = A.labels ?? A.label;
+    if (!l) return [];
+    return (Array.isArray(l) ? l : String(l).split(','))
+      .map((s) => String(s).trim())
+      .filter(Boolean);
+  })();
+  // Never dispatch container/tracking issues: an `epic` (plus any args.excludeLabels)
+  // is a milestone, not a buildable unit. Drop them from BOTH the working set AND
+  // dependency truth — an epic only closes once its children do, so treating it as a
+  // blockedBy dep would deadlock every child. `epic` is always excluded.
+  const EXCLUDE_LABELS = [
+    'epic',
+    ...(Array.isArray(A.excludeLabels) ? A.excludeLabels : A.excludeLabels ? String(A.excludeLabels).split(',') : [])
+      .map((s) => String(s).trim())
+      .filter(Boolean),
+  ];
+  const buildable = scoutResult.openIssues.filter(
+    (i) => !(i.labels ?? []).some((l) => EXCLUDE_LABELS.includes(l)),
+  );
+  const excludedCount = scoutResult.openIssues.length - buildable.length;
+  if (excludedCount > 0) {
+    log(`Excluded ${excludedCount} non-buildable issue(s) labeled [${EXCLUDE_LABELS.join(', ')}].`);
+  }
+  const allOpenNumbers = new Set(buildable.map((i) => i.number));
+  let openIssues = buildable;
+  if (TARGET_LABELS.length) {
+    openIssues = openIssues.filter((i) => (i.labels ?? []).some((l) => TARGET_LABELS.includes(l)));
+    log(`Label filter [${TARGET_LABELS.join(', ')}]: driving ${openIssues.length} of ${buildable.length} buildable open issues.`);
+  }
 
   // Merge happens at the workflow (main-session) level — never inside the
   // read-only staff-engineer review agent. This is a separate, write-capable
@@ -282,14 +322,15 @@ if (scoutResult.error) {
     log(`--- Round ${iterations} / ${MAX_ITERATIONS} (${openIssues.length} open) ---`);
 
     // Find issues whose blockers are all closed: closed by us this run, OR not in
-    // the current open set. Scout returns only OPEN issues, so a blockedBy dep that
-    // is absent from openIssues is already closed (e.g. in a PRIOR session) — that
-    // second clause is what un-strands "blockedBy a prior-closed issue". Without it,
-    // `closedThisRun` only knows this-run closures, so such an issue is never ready
-    // and the loop falsely reports "blocker detected, none ready" and stops.
-    // (Reproduced + fix verified in a sandbox run: #4 blockedBy a pre-closed issue
-    // stalled before this change, builds and merges after it.)
-    const openNumbers = new Set(openIssues.map((i) => i.number));
+    // the open set AT SCOUT TIME. `allOpenNumbers` is the snapshot of EVERY open
+    // issue (not just the label-filtered working set) — so a blockedBy dep absent
+    // from it is already closed (e.g. in a PRIOR session) and is satisfied, while a
+    // dep still open under a DIFFERENT label correctly keeps the dependent blocked.
+    // Without the second clause `closedThisRun` only knows this-run closures, so a
+    // "blockedBy a prior-closed issue" issue is never ready and the loop falsely
+    // reports "blocker detected, none ready" and stops. (Reproduced + fix verified
+    // in a sandbox run: #4 blockedBy a pre-closed issue stalled before this change.)
+    const openNumbers = allOpenNumbers;
     const ready = openIssues.filter(
       (issue) =>
         !seen.has(issue.number) &&
