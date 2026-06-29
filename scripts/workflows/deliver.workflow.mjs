@@ -298,8 +298,22 @@ if (scoutResult.error) {
 
     if (ready.length === 0) {
       if (openIssues.length > 0) {
-        log(`Blocker detected: ${openIssues.length} open issues but none are ready. Stopping.`);
-        log(`Open: ${openIssues.map((i) => `#${i.number}`).join(', ')}`);
+        log(`Blocker detected: ${openIssues.length} open issue(s), none ready. Stopping.`);
+        // Name the edges so the halt is self-explaining: each open issue is either
+        // (a) blocked by a still-open dependency, or (b) already attempted this run
+        // and left open (flagged for rework — its failure findings are on the issue).
+        for (const iss of openIssues) {
+          const unmet = iss.blockedBy.filter(
+            (dep) => !closedThisRun.has(dep) && openNumbers.has(dep),
+          );
+          if (unmet.length > 0) {
+            log(`  #${iss.number} "${iss.title}" — blocked by ${unmet.map((d) => `#${d}`).join(', ')} (still open)`);
+          } else if (seen.has(iss.number)) {
+            log(`  #${iss.number} "${iss.title}" — attempted this run, left open (flagged for rework; see issue comments)`);
+          } else {
+            log(`  #${iss.number} "${iss.title}" — open`);
+          }
+        }
       }
       break;
     }
