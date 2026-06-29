@@ -96,7 +96,9 @@ tool against this repo, passing:
   args: { maxRounds: 12, budgetThreshold: 50000, securityReview: "sensitive" }
 ```
 
-The phrase **"run it with the Workflow tool"** is the opt-in (the Workflow tool never fires without it). The agents run in *this repo's* working directory, so their `gh`/`git` target this repo's issues. `args` is read by the script — overrides any of `maxRounds`, `maxEmptyRounds`, `budgetThreshold`, `parallel`, `models`, `securityReview` (omitted keys keep their defaults).
+The phrase **"run it with the Workflow tool"** is the opt-in (the Workflow tool never fires without it). The agents run in *this repo's* working directory, so their `gh`/`git` target this repo's issues. `args` is read by the script — overrides any of `maxRounds`, `maxEmptyRounds`, `budgetThreshold`, `parallel`, `models`, `securityReview`, `labels`, `excludeLabels` (omitted keys keep their defaults).
+
+**Scope a run to one epic/wave** with `args.labels` (string, comma-list, or array) — the loop drives only issues carrying one of those labels, e.g. `args: { labels: 'wave-1' }`. This is the mode-A way to do one-epic-per-cycle: scout still reads *all* open issues for dependency truth (so a `wave-1` issue blocked by a still-open `wave-0` issue is correctly held), but only the labeled subset gets built. Issues labeled **`epic` are never dispatched** (milestone containers, not buildable — and excluded from dependency truth so they can't deadlock their children); add more non-buildable labels with `args.excludeLabels`.
 
 > If you'd rather keep typing `/orchestrate`, append `— use the Workflow tool (mode A)` to force the script. Otherwise expect mode B, where you must tell it to tier models (`dispatch implementers on Sonnet; only the review/security gates on Opus`) or it runs everything at top-tier cost.
 
